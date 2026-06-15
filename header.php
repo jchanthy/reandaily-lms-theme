@@ -122,8 +122,19 @@
             border-radius: var(--border-radius-sm);
             width: 200px;
             box-shadow: var(--shadow-lg);
-            overflow: hidden;
+            overflow: visible; /* Changed from hidden to allow pseudo-element to render outside */
             z-index: 10;
+        }
+
+        /* Hover bridge to prevent menu from closing when moving mouse over the gap */
+        .profile-menu::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: transparent;
         }
 
         .user-dropdown:hover .profile-menu {
@@ -139,7 +150,14 @@
             font-size: 14px;
         }
 
-        .profile-menu-link:last-child {
+        .profile-menu-link:first-of-type {
+            border-top-left-radius: var(--border-radius-sm);
+            border-top-right-radius: var(--border-radius-sm);
+        }
+
+        .profile-menu-link:last-of-type {
+            border-bottom-left-radius: var(--border-radius-sm);
+            border-bottom-right-radius: var(--border-radius-sm);
         }
 
         .profile-menu-link:hover {
