@@ -462,15 +462,32 @@ class ReanDaily_LMS_Theme_Updater {
 
     public function debug_notice() {
         if ( isset( $_GET['debug_updater'] ) ) {
+            $headers = array( 'User-Agent' => 'WordPress/' . get_bloginfo('version') );
+            if ( defined( 'GITHUB_API_TOKEN' ) && GITHUB_API_TOKEN ) {
+                $headers['Authorization'] = 'token ' . GITHUB_API_TOKEN;
+            }
+
             $response = wp_remote_get( "https://api.github.com/repos/{$this->repo}/releases/latest", array(
-                'headers' => array( 'User-Agent' => 'WordPress/' . get_bloginfo('version') )
+                'headers' => $headers
             ) );
             $remote = 'Error/Unknown';
+            $extra = '';
             if ( ! is_wp_error( $response ) ) {
-                $release = json_decode( wp_remote_retrieve_body( $response ), true );
-                $remote = isset( $release['tag_name'] ) ? $release['tag_name'] : 'No tag';
+                $body = wp_remote_retrieve_body( $response );
+                $release = json_decode( $body, true );
+                if ( isset( $release['tag_name'] ) ) {
+                    $remote = $release['tag_name'];
+                } elseif ( isset( $release['message'] ) ) {
+                    $remote = 'API Error';
+                    $extra = ' - Message: ' . esc_html( $release['message'] );
+                } else {
+                    $remote = 'No tag';
+                    $extra = ' - Response Code: ' . wp_remote_retrieve_response_code( $response );
+                }
+            } else {
+                $extra = ' - WP Error: ' . $response->get_error_message();
             }
-            echo "<div class='notice notice-info'><p><strong>Git Updater Debug:</strong> Local: {$this->version} | Remote: {$remote} | Slug: {$this->theme_slug} | Repo: {$this->repo}</p></div>";
+            echo "<div class='notice notice-info'><p><strong>Git Updater Debug:</strong> Local: {$this->version} | Remote: {$remote}{$extra} | Slug: {$this->theme_slug} | Repo: {$this->repo}</p></div>";
         }
     }
 
@@ -479,9 +496,14 @@ class ReanDaily_LMS_Theme_Updater {
             return $transient;
         }
 
+        $headers = array( 'User-Agent' => 'WordPress/' . get_bloginfo('version') );
+        if ( defined( 'GITHUB_API_TOKEN' ) && GITHUB_API_TOKEN ) {
+            $headers['Authorization'] = 'token ' . GITHUB_API_TOKEN;
+        }
+
         // Fetch latest release details from GitHub API
         $response = wp_remote_get( "https://api.github.com/repos/{$this->repo}/releases/latest", array(
-            'headers' => array( 'User-Agent' => 'WordPress/' . get_bloginfo('version') )
+            'headers' => $headers
         ) );
 
         if ( is_wp_error( $response ) ) {
