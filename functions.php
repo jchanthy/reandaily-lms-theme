@@ -1,0 +1,432 @@
+<?php
+/**
+ * ReanDaily LMS Theme Functions
+ *
+ * @package ReanDaily_LMS
+ */
+
+// ── 1. THEME SUPPORT & ASSETS ────────────────────────────────────────────────
+function reandaily_lms_setup() {
+    add_theme_support( 'title-tag' );
+    add_theme_support( 'post-thumbnails' );
+    add_theme_support( 'custom-logo' );
+    add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
+}
+add_action( 'after_setup_theme', 'reandaily_lms_setup' );
+
+function reandaily_lms_enqueue_assets() {
+    // Google Fonts (Inter, Outfit, Kantumruy Pro for Khmer)
+    wp_enqueue_style( 'reandaily-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Kantumruy+Pro:wght@400;500;600;700&display=swap', array(), null );
+    
+    // Main Stylesheet
+    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.0.0' );
+
+    // FontAwesome for UI icons
+    wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0' );
+
+    // Load QRCode.js library for checkout page
+    if ( is_page_template( 'page-enroll.php' ) || is_page( 'enroll' ) ) {
+        wp_enqueue_script( 'qrcode-js', 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', array(), '1.0.0', true );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'reandaily_lms_enqueue_assets' );
+
+
+// ── 2. DATABASE AUTO-SETUP (theme switch) ──────────────────────────────────
+function reandaily_lms_create_db_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reandaily_lms';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        user_id bigint(20) NOT NULL,
+        course_id bigint(20) NOT NULL,
+        status varchar(50) DEFAULT 'pending' NOT NULL,
+        completed_lessons text DEFAULT '' NOT NULL,
+        bill_number varchar(100) DEFAULT '' NOT NULL,
+        payment_method varchar(50) DEFAULT '' NOT NULL,
+        receipt_img varchar(255) DEFAULT '' NOT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY  (id),
+        KEY user_course (user_id, course_id)
+    ) $charset_collate;";
+
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+    dbDelta( $sql );
+}
+add_action( 'after_switch_theme', 'reandaily_lms_create_db_table' );
+
+
+// ── 3. REGISTER CUSTOM POST TYPES ───────────────────────────────────────────
+function reandaily_lms_register_cpts() {
+    // Courses Custom Post Type
+    register_post_type( 'courses', array(
+        'labels' => array(
+            'name'          => __( 'Courses', 'reandaily-lms-theme' ),
+            'singular_name' => __( 'Course', 'reandaily-lms-theme' ),
+            'add_new'       => __( 'Add New Course', 'reandaily-lms-theme' ),
+            'edit_item'     => __( 'Edit Course', 'reandaily-lms-theme' ),
+            'all_items'     => __( 'All Courses', 'reandaily-lms-theme' ),
+        ),
+        'public'      => true,
+        'has_archive' => true,
+        'supports'    => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'menu_icon'   => 'dashicons-welcome-learn-more',
+        'rewrite'     => array( 'slug' => 'courses' ),
+        'show_in_rest'=> true,
+    ) );
+
+    // Lessons Custom Post Type
+    register_post_type( 'lessons', array(
+        'labels' => array(
+            'name'          => __( 'Lessons', 'reandaily-lms-theme' ),
+            'singular_name' => __( 'Lesson', 'reandaily-lms-theme' ),
+            'add_new'       => __( 'Add New Lesson', 'reandaily-lms-theme' ),
+            'edit_item'     => __( 'Edit Lesson', 'reandaily-lms-theme' ),
+            'all_items'     => __( 'All Lessons', 'reandaily-lms-theme' ),
+        ),
+        'public'      => true,
+        'has_archive' => false,
+        'supports'    => array( 'title', 'editor', 'thumbnail' ),
+        'menu_icon'   => 'dashicons-playlist-video',
+        'rewrite'     => array( 'slug' => 'lessons' ),
+        'show_in_rest'=> true,
+    ) );
+}
+add_action( 'init', 'reandaily_lms_register_cpts' );
+
+
+// ── 4. CUSTOMIZER REGISTER SETTINGS ──────────────────────────────────────────
+function reandaily_lms_customize_register( $wp_customize ) {
+    // Add Payment Gateway Section
+    $wp_customize->add_section( 'reandaily_lms_payment_section', array(
+        'title'    => __( 'LMS KHQR & Bank Settings', 'reandaily-lms-theme' ),
+        'priority' => 30,
+    ) );
+
+    // ABA PayWay Link
+    $wp_customize->add_setting( 'reandaily_aba_payway_link', array( 'default' => '', 'sanitize_callback' => 'esc_url_raw' ) );
+    $wp_customize->add_control( 'reandaily_aba_payway_link_control', array(
+        'label'    => __( 'ABA PayWay Link', 'reandaily-lms-theme' ),
+        'section'  => 'reandaily_lms_payment_section',
+        'settings' => 'reandaily_aba_payway_link',
+        'type'     => 'url'
+    ) );
+
+    // ABA Bakong ID
+    $wp_customize->add_setting( 'reandaily_aba_bakong_id', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ) );
+    $wp_customize->add_control( 'reandaily_aba_bakong_id_control', array(
+        'label'    => __( 'ABA Bakong ID (e.g. name@aba)', 'reandaily-lms-theme' ),
+        'section'  => 'reandaily_lms_payment_section',
+        'settings' => 'reandaily_aba_bakong_id',
+        'type'     => 'text'
+    ) );
+
+    // Merchant Name
+    $wp_customize->add_setting( 'reandaily_aba_merchant_name', array( 'default' => 'ReanDaily', 'sanitize_callback' => 'sanitize_text_field' ) );
+    $wp_customize->add_control( 'reandaily_aba_merchant_name_control', array(
+        'label'    => __( 'Merchant Name (On QR)', 'reandaily-lms-theme' ),
+        'section'  => 'reandaily_lms_payment_section',
+        'settings' => 'reandaily_aba_merchant_name',
+        'type'     => 'text'
+    ) );
+
+    // Merchant City
+    $wp_customize->add_setting( 'reandaily_aba_merchant_city', array( 'default' => 'Phnom Penh', 'sanitize_callback' => 'sanitize_text_field' ) );
+    $wp_customize->add_control( 'reandaily_aba_merchant_city_control', array(
+        'label'    => __( 'Merchant City', 'reandaily-lms-theme' ),
+        'section'  => 'reandaily_lms_payment_section',
+        'settings' => 'reandaily_aba_merchant_city',
+        'type'     => 'text'
+    ) );
+
+    // Manual Bank Details
+    $wp_customize->add_setting( 'reandaily_manual_bank_name', array( 'default' => 'Advanced Bank of Asia (ABA)', 'sanitize_callback' => 'sanitize_text_field' ) );
+    $wp_customize->add_control( 'reandaily_manual_bank_name_control', array(
+        'label'    => __( 'Manual Bank Name', 'reandaily-lms-theme' ),
+        'section'  => 'reandaily_lms_payment_section',
+        'settings' => 'reandaily_manual_bank_name',
+        'type'     => 'text'
+    ) );
+
+    $wp_customize->add_setting( 'reandaily_manual_account_name', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ) );
+    $wp_customize->add_control( 'reandaily_manual_account_name_control', array(
+        'label'    => __( 'Manual Account Name', 'reandaily-lms-theme' ),
+        'section'  => 'reandaily_lms_payment_section',
+        'settings' => 'reandaily_manual_account_name',
+        'type'     => 'text'
+    ) );
+
+    $wp_customize->add_setting( 'reandaily_manual_account_no', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ) );
+    $wp_customize->add_control( 'reandaily_manual_account_no_control', array(
+        'label'    => __( 'Manual Account Number', 'reandaily-lms-theme' ),
+        'section'  => 'reandaily_lms_payment_section',
+        'settings' => 'reandaily_manual_account_no',
+        'type'     => 'text'
+    ) );
+
+    // Custom QR Code Center Logo upload
+    $wp_customize->add_setting( 'reandaily_qr_code_logo', array( 'default' => '', 'sanitize_callback' => 'esc_url_raw' ) );
+    $wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'reandaily_qr_code_logo_control', array(
+        'label'       => __( 'QR Code Center Logo', 'reandaily-lms-theme' ),
+        'description' => __( 'Upload an image to display in the center of checkout QR codes. Recommended: square PNG with solid background.', 'reandaily-lms-theme' ),
+        'section'     => 'reandaily_lms_payment_section',
+        'settings'    => 'reandaily_qr_code_logo',
+    ) ) );
+}
+add_action( 'customize_register', 'reandaily_lms_customize_register' );
+
+
+// ── 5. CORE LMS USER & HELPERS FUNCTIONS ──────────────────────────────────────
+function reandaily_lms_is_enrolled( $user_id, $course_id ) {
+    global $wpdb;
+    if ( ! $user_id || ! $course_id ) return false;
+    
+    // Admins always have access to test
+    if ( user_can( $user_id, 'manage_options' ) ) {
+        return 'active';
+    }
+
+    $table_name = $wpdb->prefix . 'reandaily_lms';
+    $status = $wpdb->get_var( $wpdb->prepare(
+        "SELECT status FROM $table_name WHERE user_id = %d AND course_id = %d ORDER BY id DESC LIMIT 1",
+        $user_id,
+        $course_id
+    ) );
+    
+    return $status ? $status : false;
+}
+
+function reandaily_lms_get_progress( $user_id, $course_id ) {
+    global $wpdb;
+    if ( ! $user_id || ! $course_id ) return 0;
+
+    $table_name = $wpdb->prefix . 'reandaily_lms';
+    $completed_raw = $wpdb->get_var( $wpdb->prepare(
+        "SELECT completed_lessons FROM $table_name WHERE user_id = %d AND course_id = %d LIMIT 1",
+        $user_id,
+        $course_id
+    ) );
+
+    $completed_lessons = ! empty( $completed_raw ) ? json_decode( $completed_raw, true ) : array();
+    if ( ! is_array( $completed_lessons ) ) {
+        $completed_lessons = array();
+    }
+
+    $lessons_order = get_post_meta( $course_id, '_lessons_order', true );
+    if ( empty( $lessons_order ) || ! is_array( $lessons_order ) ) {
+        return 0;
+    }
+
+    $total_lessons = count( $lessons_order );
+    if ( $total_lessons === 0 ) return 0;
+
+    // Filter to count valid completed lessons that belong to this course
+    $valid_completed = count( array_intersect( $completed_lessons, $lessons_order ) );
+
+    return round( ( $valid_completed / $total_lessons ) * 100 );
+}
+
+
+// ── 6. AJAX LMS HANDLERS ────────────────────────────────────────────────────
+
+// Check & Save Enrollment on Checkout
+function ajax_reandaily_lms_enroll_student() {
+    check_ajax_referer( 'reandaily_lms_nonce', 'security' );
+    
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error( array( 'message' => 'Please log in to continue.' ) );
+    }
+
+    $user_id   = get_current_user_id();
+    $course_id = isset( $_POST['course_id'] ) ? intval( $_POST['course_id'] ) : 0;
+    $method    = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : 'khqr';
+
+    if ( ! $course_id ) {
+        wp_send_json_error( array( 'message' => 'Invalid course.' ) );
+    }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reandaily_lms';
+
+    // Check if already active
+    $existing = reandaily_lms_is_enrolled( $user_id, $course_id );
+    if ( $existing === 'active' ) {
+        wp_send_json_success( array( 'redirect' => get_permalink( $course_id ) ) );
+    }
+
+    $bill_number = 'RD-' . $course_id . '-' . time();
+
+    // Insert or update pending enrollment
+    $exists = $wpdb->get_row( $wpdb->prepare(
+        "SELECT id FROM $table_name WHERE user_id = %d AND course_id = %d LIMIT 1",
+        $user_id,
+        $course_id
+    ) );
+
+    if ( $exists ) {
+        $wpdb->update(
+            $table_name,
+            array(
+                'status'         => 'pending',
+                'bill_number'    => $bill_number,
+                'payment_method' => $method,
+                'created_at'     => current_time( 'mysql' )
+            ),
+            array( 'id' => $exists->id )
+        );
+    } else {
+        $wpdb->insert(
+            $table_name,
+            array(
+                'user_id'           => $user_id,
+                'course_id'         => $course_id,
+                'status'            => 'pending',
+                'completed_lessons' => wp_json_encode( array() ),
+                'bill_number'       => $bill_number,
+                'payment_method'    => $method,
+                'created_at'        => current_time( 'mysql' )
+            )
+        );
+    }
+
+    wp_send_json_success( array( 'bill_number' => $bill_number ) );
+}
+add_action( 'wp_ajax_reandaily_lms_enroll_student', 'ajax_reandaily_lms_enroll_student' );
+
+
+// Upload Receipt Handler
+function ajax_reandaily_lms_submit_receipt() {
+    check_ajax_referer( 'reandaily_lms_nonce', 'security' );
+
+    if ( ! is_user_logged_in() || empty( $_FILES['receipt_file'] ) ) {
+        wp_send_json_error( array( 'message' => 'Invalid request.' ) );
+    }
+
+    $user_id   = get_current_user_id();
+    $course_id = isset( $_POST['course_id'] ) ? intval( $_POST['course_id'] ) : 0;
+
+    if ( ! $course_id ) {
+        wp_send_json_error( array( 'message' => 'Course ID is missing.' ) );
+    }
+
+    // Handle File Upload safely
+    if ( ! function_exists( 'wp_handle_upload' ) ) {
+        require_once( ABSPATH . 'wp-admin/includes/file.php' );
+    }
+
+    $uploadedfile = $_FILES['receipt_file'];
+    $upload_overrides = array(
+        'test_form' => false,
+        'mimes'     => array(
+            'jpg|jpeg|jpe' => 'image/jpeg',
+            'png'          => 'image/png',
+            'webp'         => 'image/webp',
+        ),
+    );
+    $movefile = wp_handle_upload( $uploadedfile, $upload_overrides );
+
+    if ( $movefile && ! isset( $movefile['error'] ) ) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'reandaily_lms';
+
+        $wpdb->update(
+            $table_name,
+            array(
+                'status'      => 'pending',
+                'receipt_img' => $movefile['url']
+            ),
+            array( 'user_id' => $user_id, 'course_id' => $course_id )
+        );
+
+        wp_send_json_success( array( 'message' => 'Receipt uploaded successfully! Waiting for Admin verification.' ) );
+    } else {
+        wp_send_json_error( array( 'message' => $movefile['error'] ) );
+    }
+}
+add_action( 'wp_ajax_reandaily_lms_submit_receipt', 'ajax_reandaily_lms_submit_receipt' );
+
+
+// Progress update handler
+function ajax_reandaily_lms_update_progress() {
+    check_ajax_referer( 'reandaily_lms_nonce', 'security' );
+    
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error( array( 'message' => 'Logged out.' ) );
+    }
+
+    $user_id   = get_current_user_id();
+    $course_id = isset( $_POST['course_id'] ) ? intval( $_POST['course_id'] ) : 0;
+    $lesson_id = isset( $_POST['lesson_id'] ) ? intval( $_POST['lesson_id'] ) : 0;
+    $completed = isset( $_POST['completed'] ) && $_POST['completed'] === 'true' ? true : false;
+
+    if ( ! $course_id || ! $lesson_id ) {
+        wp_send_json_error( array( 'message' => 'Invalid parameters.' ) );
+    }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reandaily_lms';
+
+    $completed_raw = $wpdb->get_var( $wpdb->prepare(
+        "SELECT completed_lessons FROM $table_name WHERE user_id = %d AND course_id = %d LIMIT 1",
+        $user_id,
+        $course_id
+    ) );
+
+    $completed_lessons = ! empty( $completed_raw ) ? json_decode( $completed_raw, true ) : array();
+    if ( ! is_array( $completed_lessons ) ) {
+        $completed_lessons = array();
+    }
+
+    if ( $completed ) {
+        if ( ! in_array( $lesson_id, $completed_lessons ) ) {
+            $completed_lessons[] = $lesson_id;
+        }
+    } else {
+        $completed_lessons = array_diff( $completed_lessons, array( $lesson_id ) );
+    }
+
+    $wpdb->update(
+        $table_name,
+        array( 'completed_lessons' => wp_json_encode( array_values( $completed_lessons ) ) ),
+        array( 'user_id' => $user_id, 'course_id' => $course_id )
+    );
+
+    // Calculate overall course completion status
+    $progress = reandaily_lms_get_progress( $user_id, $course_id );
+    if ( $progress >= 100 ) {
+        $wpdb->update(
+            $table_name,
+            array( 'status' => 'completed' ),
+            array( 'user_id' => $user_id, 'course_id' => $course_id )
+        );
+    } else {
+        $wpdb->update(
+            $table_name,
+            array( 'status' => 'active' ),
+            array( 'user_id' => $user_id, 'course_id' => $course_id )
+        );
+    }
+
+    wp_send_json_success( array( 'progress' => $progress ) );
+}
+add_action( 'wp_ajax_reandaily_lms_update_progress', 'ajax_reandaily_lms_update_progress' );
+
+
+// Check Poll Status
+function ajax_reandaily_lms_check_status() {
+    check_ajax_referer( 'reandaily_lms_nonce', 'security' );
+
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error( array( 'message' => 'Logged out.' ) );
+    }
+
+    $user_id   = get_current_user_id();
+    $course_id = isset( $_POST['course_id'] ) ? intval( $_POST['course_id'] ) : 0;
+    
+    $status = reandaily_lms_is_enrolled( $user_id, $course_id );
+    
+    wp_send_json_success( array( 'status' => $status ) );
+}
+add_action( 'wp_ajax_reandaily_lms_check_status', 'ajax_reandaily_lms_check_status' );

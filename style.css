@@ -1,0 +1,99 @@
+/*
+Theme Name: ReanDaily LMS Theme
+Theme URI: https://reandaily.com/
+GitHub Theme URI: jchanthy/reandaily-lms-theme
+Primary Branch: main
+Description: A custom, lightweight, high-performance Learning Management System theme built from scratch for ReanDaily. Fully integrated with KHQR/ABA payment gateways and a distraction-free custom classroom player.
+Version: 1.0.0
+Author: Antigravity
+Author URI: https://reandaily.com/
+Text Domain: reandaily-lms-theme
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+*/
+
+/* ==========================================================================
+   1. CORE CSS VARIABLES & DESIGN SYSTEM
+   ========================================================================== */
+:root {
+    --font-primary: 'Inter', sans-serif;
+    --font-heading: 'Outfit', sans-serif;
+    --font-khmer: 'Kantumruy Pro', sans-serif;
+
+    /* Color Palette */
+    --color-primary: #E52F2E;        /* Branding Red */
+    --color-primary-hover: #c42221;
+    --color-secondary: #007bff;      /* Accent Blue */
+    --color-success: #10b981;        /* Completed/Success Green */
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+
+    /* Light Mode Theme (Default) */
+    --bg-main: #f8fafc;              /* Slate Light */
+    --bg-card: #ffffff;              /* White Card */
+    --bg-input: #f1f5f9;
+    --text-main: #0f172a;            /* Slate Dark */
+    --text-muted: #64748b;           /* Slate Grey */
+    --border-color: #e2e8f0;
+
+    /* Dark Mode (Alternative context) */
+    --dark-bg-main: #0b0f19;
+    --dark-bg-card: #151b2c;
+    --dark-text-main: #f8fafc;
+    --dark-text-muted: #94a3b8;
+    --dark-border: rgba(255, 255, 255, 0.08);
+
+    /* Transitions & Shadows */
+    --transition-fast: all 0.2s ease;
+    --transition-normal: all 0.3s ease;
+    --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+    --border-radius-sm: 8px;
+    --border-radius-md: 16px;
+    --border-radius-lg: 24px;
+}
+
+/* Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Custom fonts styling */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.25;
+}
+
+/* Khmer-specific formatting when text contains Khmer script */
+:lang(kh), .khmer-text {
+    font-family: var(--font-khmer) !important;
+}
+
+a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+a:hover {
+    color: #38bdf8;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
