@@ -34,8 +34,8 @@ if ( ! is_user_logged_in() ) {
 $enroll_status = reandaily_lms_is_enrolled( $user_id, $course_id );
 $is_preview    = get_post_meta( $lesson_id, '_is_preview', true );
 
-if ( $enroll_status !== 'active' && $enroll_status !== 'completed' && ! $is_preview ) {
-    // Not enrolled and not a free preview lesson -> redirect to course overview page
+if ( $enroll_status !== 'active' && $enroll_status !== 'completed' && ! $is_preview && ! current_user_can( 'manage_options' ) ) {
+    // Not enrolled, not a free preview, and not an admin -> redirect to course overview page
     wp_redirect( get_permalink( $course_id ) );
     exit;
 }
@@ -249,7 +249,7 @@ $duration  = get_post_meta( $lesson_id, '_duration', true );
 
         <!-- Lesson Title & Description -->
         <div>
-            <h1 style="font-size: 28px; font-weight: 800; font-family: var(--font-khmer); margin-bottom: 16px; color: var(--text-main);"><?php the_title(); ?></h1>
+            <h1 style="font-size: 28px; font-weight: 800; font-family: var(--font-khmer-heading); margin-bottom: 16px; color: var(--text-main);"><?php the_title(); ?></h1>
             <div style="color: var(--text-muted); line-height: 1.8; font-size: 15.5px; font-family: var(--font-khmer);">
                 <?php the_content(); ?>
             </div>
@@ -261,7 +261,7 @@ $duration  = get_post_meta( $lesson_id, '_duration', true );
         <!-- Course Title -->
         <div class="card" style="padding: 24px; margin-bottom: 24px; background-color: var(--bg-card);">
             <h4 style="font-size: 13px; color: var(--color-primary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">COURSE PROGRESS</h4>
-            <h3 style="font-size: 18px; margin-top: 6px; font-family: var(--font-khmer); line-height: 1.4; color: var(--text-main);"><?php echo esc_html( $course_title ); ?></h3>
+            <h3 style="font-size: 18px; margin-top: 6px; font-family: var(--font-khmer-heading); line-height: 1.4; color: var(--text-main);"><?php echo esc_html( $course_title ); ?></h3>
             
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="lms-progress-bar" style="width: <?php echo reandaily_lms_get_progress( $user_id, $course_id ); ?>%;"></div>

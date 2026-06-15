@@ -15,11 +15,11 @@ function reandaily_lms_setup() {
 add_action( 'after_setup_theme', 'reandaily_lms_setup' );
 
 function reandaily_lms_enqueue_assets() {
-    // Google Fonts (Inter, Outfit, Kantumruy for Khmer)
-    wp_enqueue_style( 'reandaily-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Kantumruy:wght@300;400;700&display=swap', array(), null );
+    // Google Fonts (Inter, Outfit, Kantumruy & Kantumruy Pro for Khmer)
+    wp_enqueue_style( 'reandaily-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Kantumruy:wght@300;400;700&family=Kantumruy+Pro:wght@500;700&display=swap', array(), null );
     
     // Main Stylesheet
-    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.0.6' );
+    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.0.7' );
 
     // FontAwesome for UI icons
     wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0' );
@@ -56,6 +56,90 @@ function reandaily_lms_create_db_table() {
     dbDelta( $sql );
 }
 add_action( 'after_switch_theme', 'reandaily_lms_create_db_table' );
+
+function reandaily_lms_create_required_pages() {
+    // Enroll Page
+    $enroll_page = get_page_by_path( 'enroll' );
+    if ( ! $enroll_page ) {
+        $enroll_id = wp_insert_post( array(
+            'post_title'   => 'Enroll',
+            'post_name'    => 'enroll',
+            'post_status'  => 'publish',
+            'post_type'    => 'page',
+        ) );
+        if ( $enroll_id ) {
+            update_post_meta( $enroll_id, '_wp_page_template', 'page-enroll.php' );
+        }
+    } else {
+        update_post_meta( $enroll_page->ID, '_wp_page_template', 'page-enroll.php' );
+    }
+
+    // Dashboard Page
+    $dashboard_page = get_page_by_path( 'dashboard' );
+    if ( ! $dashboard_page ) {
+        $dashboard_id = wp_insert_post( array(
+            'post_title'   => 'Dashboard',
+            'post_name'    => 'dashboard',
+            'post_status'  => 'publish',
+            'post_type'    => 'page',
+        ) );
+        if ( $dashboard_id ) {
+            update_post_meta( $dashboard_id, '_wp_page_template', 'page-dashboard.php' );
+        }
+    } else {
+        update_post_meta( $dashboard_page->ID, '_wp_page_template', 'page-dashboard.php' );
+    }
+}
+add_action( 'admin_init', 'reandaily_lms_create_required_pages' );
+
+function reandaily_lms_install_demo_data() {
+    if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    if ( isset( $_GET['reandaily_install_demo'] ) ) {
+        // Create Bakong Test Course
+        $existing = get_page_by_path( 'bakong-test-course-real-bank-money', OBJECT, 'courses' );
+        if ( ! $existing ) {
+            $course_id = wp_insert_post( array(
+                'post_title'   => 'Bakong Test Course (Real Bank Money)',
+                'post_content' => 'This course is created for testing real money transactions using Bakong KHQR. It is priced at $0.10 (USD) or 400 Riels (KHR).',
+                'post_status'  => 'publish',
+                'post_type'    => 'courses'
+            ) );
+
+            if ( ! is_wp_error( $course_id ) ) {
+                update_post_meta( $course_id, '_price', '0.10' );
+                update_post_meta( $course_id, '_price_khr', '400' );
+                update_post_meta( $course_id, '_duration', '1 Hour' );
+                update_post_meta( $course_id, '_level', 'Beginner' );
+
+                // Create lessons
+                $lesson_ids = array();
+                for ( $i = 1; $i <= 2; $i++ ) {
+                    $lesson_id = wp_insert_post( array(
+                        'post_title'   => "Lesson $i: Introduction to KHQR Payment",
+                        'post_content' => "This is lesson $i content. In this lesson, we will cover how to scan and verify payment.",
+                        'post_status'  => 'publish',
+                        'post_type'    => 'lessons'
+                    ) );
+                    if ( ! is_wp_error( $lesson_id ) ) {
+                        update_post_meta( $lesson_id, '_duration', '15 mins' );
+                        if ( $i == 1 ) {
+                            update_post_meta( $lesson_id, '_is_preview', '1' );
+                        }
+                        $lesson_ids[] = $lesson_id;
+                    }
+                }
+                update_post_meta( $course_id, '_lessons_order', $lesson_ids );
+            }
+        }
+        
+        wp_redirect( admin_url( 'edit.php?post_type=courses' ) );
+        exit;
+    }
+}
+add_action( 'admin_init', 'reandaily_lms_install_demo_data' );
 
 
 // ── 3. REGISTER CUSTOM POST TYPES ───────────────────────────────────────────
@@ -182,11 +266,6 @@ add_action( 'customize_register', 'reandaily_lms_customize_register' );
 function reandaily_lms_is_enrolled( $user_id, $course_id ) {
     global $wpdb;
     if ( ! $user_id || ! $course_id ) return false;
-    
-    // Admins always have access to test
-    if ( user_can( $user_id, 'manage_options' ) ) {
-        return 'active';
-    }
 
     $table_name = $wpdb->prefix . 'reandaily_lms';
     $status = $wpdb->get_var( $wpdb->prepare(
@@ -612,6 +691,27 @@ function reandaily_lms_generate_khqr( $bakong_id, $merchant_name, $merchant_city
     $crc_str = sprintf( '%04X', $crc );
 
     return $payload . $crc_str;
+}
+
+function reandaily_lms_get_enroll_url( $course_id = 0 ) {
+    $page = get_page_by_path( 'enroll' );
+    if ( $page ) {
+        $url = get_permalink( $page->ID );
+    } else {
+        $url = home_url( '/enroll/' );
+    }
+    if ( $course_id ) {
+        $url = add_query_arg( 'course_id', $course_id, $url );
+    }
+    return $url;
+}
+
+function reandaily_lms_get_dashboard_url() {
+    $page = get_page_by_path( 'dashboard' );
+    if ( $page ) {
+        return get_permalink( $page->ID );
+    }
+    return home_url( '/dashboard/' );
 }
 
 

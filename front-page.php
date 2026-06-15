@@ -95,7 +95,7 @@ get_header();
 
                         <!-- Content -->
                         <div style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1;">
-                            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px; font-family: var(--font-khmer); line-height: 1.4;">
+                            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px; font-family: var(--font-khmer-heading); line-height: 1.4;">
                                 <a href="<?php the_permalink(); ?>" style="color: var(--text-main);"><?php the_title(); ?></a>
                             </h3>
                             

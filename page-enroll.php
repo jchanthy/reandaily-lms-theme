@@ -15,7 +15,7 @@ $is_valid  = $course && $course->post_type === 'courses' && $course->post_status
 if ( ! $is_valid ) : ?>
 <section style="padding: 120px 20px; text-align: center; font-family: var(--font-primary);">
     <span style="font-size: 60px;">😕</span>
-    <h1 style="font-size: 28px; color: #ffffff; margin: 20px 0 10px; font-family: var(--font-khmer);">មិនឃើញវគ្គសិក្សា</h1>
+    <h1 style="font-size: 28px; color: #ffffff; margin: 20px 0 10px; font-family: var(--font-khmer-heading);">មិនឃើញវគ្គសិក្សា</h1>
     <p style="color: var(--text-muted); margin-bottom: 30px;">សូមត្រលប់ទៅជ្រើសរើសវគ្គសិក្សាម្ដងទៀត។</p>
     <a href="<?php echo esc_url( get_post_type_archive_link( 'courses' ) ); ?>" style="background: linear-gradient(135deg,#007bff,#00f2fe); color:#fff; padding:14px 32px; border-radius:8px; text-decoration:none; font-weight:700; font-size:16px;">
         ← ត្រលប់ទៅ វគ្គសិក្សា
@@ -204,14 +204,14 @@ if ( ! empty( $bakong_id ) ) {
     <div>
         <div class="card" style="margin-bottom: 30px;">
             <span style="color: var(--color-primary); font-weight: 600; font-size: 12px; text-transform: uppercase;">💳 SECURE CHECKOUT</span>
-            <h2 style="font-size: 26px; margin: 8px 0 20px; font-family: var(--font-khmer);">ព័ត៌មានការចុះឈ្មោះ</h2>
+            <h2 style="font-size: 26px; margin: 8px 0 20px; font-family: var(--font-khmer-heading);">ព័ត៌មានការចុះឈ្មោះ</h2>
             
             <div style="display: flex; gap: 20px; align-items: center; background: rgba(15,23,42,0.02); padding: 16px; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color);">
                 <?php if ( has_post_thumbnail( $course_id ) ) : ?>
                     <img src="<?php echo esc_url( get_the_post_thumbnail_url( $course_id, 'thumbnail' ) ); ?>" alt="Course Thumbnail" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--border-radius-sm);">
                 <?php endif; ?>
                 <div>
-                    <h4 style="font-size: 16px; font-family: var(--font-khmer); margin-bottom: 6px;"><?php echo esc_html( $course_title ); ?></h4>
+                    <h4 style="font-size: 16px; font-family: var(--font-khmer-heading); margin-bottom: 6px;"><?php echo esc_html( $course_title ); ?></h4>
                     <p style="color: var(--text-muted); font-size: 13.5px;">តម្លៃ (Price): <strong style="color: var(--text-main);">$<?php echo number_format( $price_usd, 2 ); ?></strong> (<?php echo number_format( $price_khr ); ?>៛)</p>
                 </div>
             </div>
@@ -401,7 +401,7 @@ if ( ! empty( $bakong_id ) ) {
                 if (data.success && data.data.status === 'active') {
                     clearInterval(pollInterval);
                     alert("🎉 ការទូទាត់ទទួលបានជោគជ័យ! ប្រព័ន្ធបានបើកវគ្គសិក្សាជូនអ្នករួចរាល់។");
-                    window.location.href = '<?php echo esc_url( home_url( '/dashboard/' ) ); ?>';
+                    window.location.href = '<?php echo esc_url( reandaily_lms_get_dashboard_url() ); ?>';
                 }
             });
         }, 3000);
@@ -447,7 +447,7 @@ if ( ! empty( $bakong_id ) ) {
             .then(data => {
                 if (data.success) {
                     alert(data.data.message);
-                    window.location.href = '<?php echo esc_url( home_url( '/dashboard/' ) ); ?>';
+                    window.location.href = '<?php echo esc_url( reandaily_lms_get_dashboard_url() ); ?>';
                 } else {
                     alert(data.data.message || 'Error uploading receipt.');
                     btn.disabled = false;

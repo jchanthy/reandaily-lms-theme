@@ -33,7 +33,7 @@ if ( is_user_logged_in() ) {
 <section style="padding: 80px 0 60px 0; background: linear-gradient(135deg, rgba(21,27,44,0.9), #0b0f19), url('<?php echo esc_url( get_the_post_thumbnail_url( $course_id, 'full' ) ); ?>') center/cover; border-bottom: 1px solid var(--border-color);">
     <div class="container" style="display: grid; grid-template-columns: 1fr; gap: 24px;">
         <span style="background: rgba(229, 47, 46, 0.15); color: var(--color-primary); padding: 6px 14px; border-radius: 4px; font-weight: 600; font-size: 13px; border: 1px solid rgba(229, 47, 46, 0.2); width: fit-content; text-transform: uppercase;">🎓 Course Details</span>
-        <h1 style="font-size: 40px; font-weight: 800; font-family: var(--font-khmer); line-height: 1.3; color:#ffffff; max-width: 800px;"><?php the_title(); ?></h1>
+        <h1 style="font-size: 40px; font-weight: 800; font-family: var(--font-khmer-heading); line-height: 1.3; color:#ffffff; max-width: 800px;"><?php the_title(); ?></h1>
         
         <div style="display: flex; gap: 24px; color: var(--text-muted); font-size: 14px; flex-wrap: wrap;">
             <span><i class="fa-solid fa-signal" style="color: var(--color-primary); margin-right: 6px;"></i><?php echo esc_html( $level ? $level : 'All Levels' ); ?></span>
@@ -71,7 +71,7 @@ if ( is_user_logged_in() ) {
                         $lesson_duration = get_post_meta( $lesson_id, '_duration', true );
                         
                         // Determine if lesson can be viewed
-                        $can_view = ( $enroll_status === 'active' || $is_preview );
+                        $can_view = ( $enroll_status === 'active' || $enroll_status === 'completed' || $is_preview || current_user_can( 'manage_options' ) );
                         $lesson_url = $can_view ? add_query_arg( 'course_id', $course_id, get_permalink( $lesson_id ) ) : '#';
                         ?>
                         <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); transition: var(--transition-fast);" <?php if ($can_view): ?>onmouseover="this.style.background='rgba(15,23,42,0.02)';" onmouseout="this.style.background='transparent';"<?php endif; ?>>
@@ -154,11 +154,11 @@ if ( is_user_logged_in() ) {
                     ចូលរៀនឥឡូវនេះ (Classroom)
                 </a>
             <?php elseif ( $enroll_status === 'pending' ) : ?>
-                <a href="<?php echo esc_url( home_url( '/enroll/?course_id=' . $course_id ) ); ?>" style="text-align: center; background: var(--color-warning); color: #ffffff; padding: 14px 24px; border-radius: var(--border-radius-sm); font-weight: 700; font-size: 15px; box-shadow: 0 4px 16px rgba(245,158,11,0.2);">
+                <a href="<?php echo esc_url( reandaily_lms_get_enroll_url( $course_id ) ); ?>" style="text-align: center; background: var(--color-warning); color: #ffffff; padding: 14px 24px; border-radius: var(--border-radius-sm); font-weight: 700; font-size: 15px; box-shadow: 0 4px 16px rgba(245,158,11,0.2);">
                     រង់ចាំការផ្ទៀងផ្ទាត់ (Pending)
                 </a>
             <?php else : 
-                $enroll_url = home_url( '/enroll/?course_id=' . $course_id );
+                $enroll_url = reandaily_lms_get_enroll_url( $course_id );
                 ?>
                 <a href="<?php echo esc_url( $enroll_url ); ?>" style="text-align: center; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: #ffffff; padding: 14px 24px; border-radius: var(--border-radius-sm); font-weight: 700; font-size: 15px; box-shadow: 0 4px 16px rgba(229,47,46,0.2);">
                     ចុះឈ្មោះចូលរៀនឥឡូវនេះ

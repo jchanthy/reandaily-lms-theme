@@ -215,7 +215,7 @@ $enrollments = $wpdb->get_results( $wpdb->prepare(
 
                     <!-- Content -->
                     <div style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1;">
-                        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; font-family: var(--font-khmer); line-height: 1.4;">
+                        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; font-family: var(--font-khmer-heading); line-height: 1.4;">
                             <a href="<?php echo esc_url( get_permalink( $course_id ) ); ?>" style="color: #ffffff;"><?php echo esc_html( $course->post_title ); ?></a>
                         </h3>
                         

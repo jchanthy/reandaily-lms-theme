@@ -177,7 +177,7 @@
             <a href="<?php echo esc_url( get_post_type_archive_link( 'courses' ) ); ?>" class="nav-link"><?php _e( 'Courses', 'reandaily-lms-theme' ); ?></a>
             
             <?php if ( is_user_logged_in() ) : 
-                $dashboard_url = home_url( '/dashboard/' );
+                $dashboard_url = reandaily_lms_get_dashboard_url();
                 ?>
                 <a href="<?php echo esc_url( $dashboard_url ); ?>" class="nav-link"><?php _e( 'My Learning', 'reandaily-lms-theme' ); ?></a>
             <?php endif; ?>
@@ -196,7 +196,7 @@
                         <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: var(--text-muted);"></i>
                     </div>
                     <div class="profile-menu">
-                        <a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="profile-menu-link">
+                        <a href="<?php echo esc_url( reandaily_lms_get_dashboard_url() ); ?>" class="profile-menu-link">
                             <i class="fa-solid fa-gauge"></i> <?php _e( 'Dashboard', 'reandaily-lms-theme' ); ?>
                         </a>
                         <?php if ( current_user_can( 'manage_options' ) ) : ?>
