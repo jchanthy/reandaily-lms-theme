@@ -72,15 +72,29 @@ body {
 
 /* Custom fonts styling */
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
+    font-family: var(--font-khmer-heading), var(--font-heading);
     font-weight: 700;
     color: var(--text-main);
     line-height: 1.25;
 }
 
 /* Khmer-specific formatting when text contains Khmer script */
-:lang(kh), .khmer-text {
-    font-family: var(--font-khmer) !important;
+:lang(kh), :lang(km), .khmer-text {
+    font-family: var(--font-khmer);
+}
+
+/* Headings use Kantumruy Pro Bold in Khmer */
+h1:lang(kh), h2:lang(kh), h3:lang(kh), h4:lang(kh), h5:lang(kh), h6:lang(kh),
+h1:lang(km), h2:lang(km), h3:lang(km), h4:lang(km), h5:lang(km), h6:lang(km),
+h1, h2, h3, h4, h5, h6,
+.khmer-heading {
+    font-family: var(--font-khmer-heading) !important;
+    font-weight: 700;
+}
+
+/* Protect FontAwesome icons from any font overrides */
+.fa, .fa-solid, .fa-regular, .fa-brands, [class^="fa-"], [class*=" fa-"] {
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands' !important;
 }
 
 a {
