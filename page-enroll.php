@@ -83,11 +83,10 @@ if ( empty( $qr_logo_url ) ) {
 
 // Generate the KHQR manual payment string locally using our custom logic or fallback to PayWay link
 $manual_qr_payload = '';
-if ( ! empty( $payway_link ) ) {
+if ( ! empty( $bakong_id ) ) {
+    $manual_qr_payload = reandaily_lms_generate_khqr( $bakong_id, $merchant_name, $merchant_city, $price_usd, 'USD' );
+} elseif ( ! empty( $payway_link ) ) {
     $manual_qr_payload = $payway_link;
-} elseif ( ! empty( $bakong_id ) ) {
-    // Basic KHQR payload generation string helper (similar to official specs)
-    $manual_qr_payload = $bakong_id;
 } else {
     // If absolutely nothing is configured, construct a placeholder or basic payment payload
     $manual_qr_payload = 'https://pay.ababank.com/oRF8/8czyh8ox'; // Fallback to ABA Link

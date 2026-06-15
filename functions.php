@@ -529,3 +529,67 @@ class ReanDaily_LMS_Theme_Updater {
 }
 new ReanDaily_LMS_Theme_Updater();
 
+
+// ── 8. DYNAMIC KHQR GENERATOR (EMVCO STANDARDS) ──────────────────────────────
+function reandaily_lms_generate_khqr( $bakong_id, $merchant_name, $merchant_city, $amount, $currency = 'USD' ) {
+    $bakong_id     = sanitize_text_field( $bakong_id );
+    $merchant_name = preg_replace( '/[^a-zA-Z0-9 ]/', '', $merchant_name );
+    $merchant_name = substr( $merchant_name, 0, 25 );
+    if ( empty( $merchant_name ) ) {
+        $merchant_name = 'ReanDaily';
+    }
+
+    $merchant_city = preg_replace( '/[^a-zA-Z0-9 ]/', '', $merchant_city );
+    $merchant_city = substr( $merchant_city, 0, 15 );
+    if ( empty( $merchant_city ) ) {
+        $merchant_city = 'Phnom Penh';
+    }
+
+    // Tag 00: Payload Format Indicator
+    $payload = '000201'; 
+    // Tag 01: Point of Initiation (12 = Dynamic QR with Amount)
+    $payload .= '010212'; 
+
+    // Tag 29: Merchant Account Information (Bakong ID)
+    $guid_subtag = '0017kh.gov.nbc.bakong';
+    $account_subtag = '01' . sprintf( '%02d', strlen( $bakong_id ) ) . $bakong_id;
+    $tag29_value = $guid_subtag . $account_subtag;
+    $payload .= '29' . sprintf( '%02d', strlen( $tag29_value ) ) . $tag29_value;
+
+    // Tag 52: Merchant Category Code (5999 = General Merchant)
+    $payload .= '52045999'; 
+
+    // Tag 53: Transaction Currency (840 = USD, 116 = KHR)
+    $curr_code = ( strtoupper( $currency ) === 'KHR' ) ? '116' : '840';
+    $payload .= '5303' . $curr_code;
+
+    // Tag 54: Transaction Amount
+    $amount_str = number_format( $amount, 2, '.', '' );
+    if ( $curr_code === '116' ) {
+        $amount_str = (string) round( $amount );
+    }
+    $payload .= '54' . sprintf( '%02d', strlen( $amount_str ) ) . $amount_str;
+
+    // Tag 58: Country Code (KH)
+    $payload .= '5802KH'; 
+    // Tag 59: Merchant Name
+    $payload .= '59' . sprintf( '%02d', strlen( $merchant_name ) ) . $merchant_name; 
+    // Tag 60: Merchant City
+    $payload .= '60' . sprintf( '%02d', strlen( $merchant_city ) ) . $merchant_city; 
+
+    // Tag 63: CRC Header
+    $payload .= '6304';
+    
+    // Calculate CRC16 CCITT (polynomial 0x1021, seed 0xFFFF)
+    $crc = 0xFFFF;
+    for ( $i = 0; $i < strlen( $payload ); $i++ ) {
+        $x = ( ( $crc >> 8 ) ^ ord( $payload[ $i ] ) ) & 0xFF;
+        $x ^= $x >> 4;
+        $crc = ( ( $crc << 8 ) ^ ( $x << 12 ) ^ ( $x << 5 ) ^ $x ) & 0xFFFF;
+    }
+    $crc_str = sprintf( '%04X', $crc );
+
+    return $payload . $crc_str;
+}
+
+
