@@ -15,11 +15,11 @@ function reandaily_lms_setup() {
 add_action( 'after_setup_theme', 'reandaily_lms_setup' );
 
 function reandaily_lms_enqueue_assets() {
-    // Google Fonts (Inter, Outfit, Kantumruy Pro for Khmer)
-    wp_enqueue_style( 'reandaily-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Kantumruy+Pro:wght@400;500;600;700&display=swap', array(), null );
+    // Google Fonts (Inter, Outfit, Kantumruy for Khmer)
+    wp_enqueue_style( 'reandaily-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Kantumruy:wght@300;400;700&display=swap', array(), null );
     
     // Main Stylesheet
-    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.0.0' );
+    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.0.6' );
 
     // FontAwesome for UI icons
     wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0' );
