@@ -1,4 +1,4 @@
-<footer class="site-footer" style="background-color: #080c14; border-top: 1px solid var(--border-color); padding: 48px 0; margin-top: 60px; font-family: var(--font-primary);">
+<footer class="site-footer" style="background-color: #080c14; padding: 48px 0; margin-top: 60px; font-family: var(--font-primary);">
     <div class="container" style="display: flex; flex-direction: column; gap: 32px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
             <div>
@@ -22,7 +22,7 @@
             </div>
         </div>
 
-        <div style="border-top: 1px solid var(--border-color); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-muted);">
+        <div style="padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13.5px; color: var(--text-muted);">
             <p>&copy; <?php echo date( 'Y' ); ?> <?php bloginfo( 'name' ); ?>. All rights reserved.</p>
             <p>Built with <i class="fa-solid fa-heart" style="color: var(--color-primary);"></i> by Antigravity</p>
         </div>

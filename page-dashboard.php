@@ -157,7 +157,7 @@ $enrollments = $wpdb->get_results( $wpdb->prepare(
     </div>
 
     <!-- Active Courses Section -->
-    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 28px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
+    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 28px;">
         <i class="fa-solid fa-graduation-cap" style="color: var(--color-primary); margin-right: 10px;"></i> វគ្គសិក្សារបស់ខ្ញុំ (My Courses)
     </h2>
 

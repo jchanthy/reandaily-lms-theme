@@ -112,7 +112,6 @@ if ( ! empty( $bakong_id ) ) {
 
     .tabs {
         display: flex;
-        border-bottom: 1px solid var(--border-color);
         margin-bottom: 24px;
         gap: 16px;
     }

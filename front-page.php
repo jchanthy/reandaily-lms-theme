@@ -3,7 +3,7 @@ get_header();
 ?>
 
 <!-- Hero Section -->
-<section class="hero-section" style="padding: 120px 0 100px 0; background: radial-gradient(circle at top right, rgba(229,47,46,0.15), transparent 60%); text-align: center; border-bottom: 1px solid var(--border-color);">
+<section class="hero-section" style="padding: 120px 0 100px 0; background: radial-gradient(circle at top right, rgba(229,47,46,0.15), transparent 60%); text-align: center;">
     <div class="container">
         <span class="badge" style="background: rgba(229, 47, 46, 0.1); color: var(--color-primary); padding: 8px 16px; border-radius: 50px; font-weight: 600; font-size: 13.5px; border: 1px solid rgba(229, 47, 46, 0.2); letter-spacing: 0.5px; text-transform: uppercase;">🚀 CUSTOM LMS FOR REANDAILY</span>
         <h1 style="font-size: 52px; font-weight: 800; margin: 24px 0 16px; font-family: var(--font-heading); background: linear-gradient(135deg, var(--text-main) 50%, var(--text-muted) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
@@ -26,7 +26,7 @@ get_header();
 </section>
 
 <!-- Stats Grid -->
-<section style="padding: 60px 0; background-color: var(--bg-card); border-bottom: 1px solid var(--border-color);">
+<section style="padding: 60px 0; background-color: var(--bg-card);">
     <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; text-align: center;">
         <div>
             <h3 style="font-size: 40px; color: var(--color-primary); font-weight: 800;">10K+</h3>
@@ -133,7 +133,7 @@ get_header();
 </section>
 
 <!-- Custom Classroom Highlight -->
-<section style="background-color: var(--bg-card); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 100px 0;">
+<section style="background-color: var(--bg-card); padding: 100px 0;">
     <div class="container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
         <div>
             <span style="color: var(--color-primary); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">💎 MODERN CLASSROOM</span>

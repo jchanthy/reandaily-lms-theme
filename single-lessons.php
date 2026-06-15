@@ -118,7 +118,6 @@ $duration  = get_post_meta( $lesson_id, '_duration', true );
         align-items: center;
         margin-bottom: 30px;
         padding-bottom: 20px;
-        border-bottom: 1px solid var(--border-color);
     }
 
     .progress-container {
@@ -157,7 +156,6 @@ $duration  = get_post_meta( $lesson_id, '_duration', true );
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid var(--border-color);
         font-size: 14px;
         color: var(--text-muted);
         transition: var(--transition-fast);
@@ -274,7 +272,7 @@ $duration  = get_post_meta( $lesson_id, '_duration', true );
 
         <!-- Curriculum Sidebar -->
         <div class="curriculum-sidebar">
-            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 15px; color: var(--text-main); background: rgba(15,23,42,0.01);">
+            <div style="padding: 16px 20px; font-weight: 700; font-size: 15px; color: var(--text-main); background: rgba(15,23,42,0.01);">
                 <i class="fa-solid fa-list-ol" style="margin-right: 8px; color: var(--color-secondary);"></i> មាតិកាវគ្គសិក្សា
             </div>
             <div style="display: flex; flex-direction: column;">

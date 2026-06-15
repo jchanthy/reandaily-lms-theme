@@ -30,7 +30,7 @@ if ( is_user_logged_in() ) {
 ?>
 
 <!-- Course Hero -->
-<section style="padding: 80px 0 60px 0; background: linear-gradient(135deg, rgba(21,27,44,0.9), #0b0f19), url('<?php echo esc_url( get_the_post_thumbnail_url( $course_id, 'full' ) ); ?>') center/cover; border-bottom: 1px solid var(--border-color);">
+<section style="padding: 80px 0 60px 0; background: linear-gradient(135deg, rgba(21,27,44,0.9), #0b0f19), url('<?php echo esc_url( get_the_post_thumbnail_url( $course_id, 'full' ) ); ?>') center/cover;">
     <div class="container" style="display: grid; grid-template-columns: 1fr; gap: 24px;">
         <span style="background: rgba(229, 47, 46, 0.15); color: var(--color-primary); padding: 6px 14px; border-radius: 4px; font-weight: 600; font-size: 13px; border: 1px solid rgba(229, 47, 46, 0.2); width: fit-content; text-transform: uppercase;">🎓 Course Details</span>
         <h1 style="font-size: 40px; font-weight: 800; font-family: var(--font-khmer-heading); line-height: 1.3; color:#ffffff; max-width: 800px;"><?php the_title(); ?></h1>
@@ -74,7 +74,7 @@ if ( is_user_logged_in() ) {
                         $can_view = ( $enroll_status === 'active' || $enroll_status === 'completed' || $is_preview || current_user_can( 'manage_options' ) );
                         $lesson_url = $can_view ? add_query_arg( 'course_id', $course_id, get_permalink( $lesson_id ) ) : '#';
                         ?>
-                        <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); transition: var(--transition-fast);" <?php if ($can_view): ?>onmouseover="this.style.background='rgba(15,23,42,0.02)';" onmouseout="this.style.background='transparent';"<?php endif; ?>>
+                        <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; transition: var(--transition-fast);" <?php if ($can_view): ?>onmouseover="this.style.background='rgba(15,23,42,0.02)';" onmouseout="this.style.background='transparent';"<?php endif; ?>>
                             <div style="display: flex; align-items: center; gap: 16px;">
                                 <span style="color: var(--text-muted); font-size: 14px; font-weight: 600; width: 20px;"><?php echo $index++; ?>.</span>
                                 <div style="display: flex; flex-direction: column;">

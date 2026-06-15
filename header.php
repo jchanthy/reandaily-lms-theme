@@ -8,7 +8,6 @@
         /* Header & Navigation Styles */
         .site-header {
             background-color: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -138,11 +137,9 @@
             padding: 12px 16px;
             color: var(--text-muted);
             font-size: 14px;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .profile-menu-link:last-child {
-            border-bottom: none;
         }
 
         .profile-menu-link:hover {

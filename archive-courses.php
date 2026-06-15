@@ -3,7 +3,7 @@ get_header();
 ?>
 
 <!-- Banner -->
-<section style="padding: 60px 0; background: radial-gradient(circle at top, rgba(0, 123, 255, 0.08), transparent 70%); border-bottom: 1px solid var(--border-color); text-align: center;">
+<section style="padding: 60px 0; background: radial-gradient(circle at top, rgba(0, 123, 255, 0.08), transparent 70%); text-align: center;">
     <div class="container">
         <span style="color: var(--color-primary); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">🎓 REANDAILY CATALOG</span>
         <h1 style="font-size: 38px; font-weight: 800; margin-top: 10px;"><?php _e( 'វគ្គសិក្សាទាំងអស់', 'reandaily-lms-theme' ); ?></h1>
@@ -52,7 +52,7 @@ get_header();
                         </p>
 
                         <!-- Meta -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: auto; font-size: 13.5px; color: var(--text-muted);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: auto; font-size: 13.5px; color: var(--text-muted);">
                             <span><i class="fa-regular fa-clock" style="margin-right: 6px; color: var(--color-secondary);"></i><?php echo esc_html( $duration ? $duration : 'Self-Paced' ); ?></span>
                             
                             <div style="text-align: right;">
