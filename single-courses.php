@@ -125,7 +125,7 @@ if ( is_user_logged_in() ) {
         </div>
 
         <!-- Course Meta Bullet List -->
-        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; border-top: 1px solid var(--border-color); padding-top: 24px; font-size: 14px; color: var(--text-muted);">
+        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; padding-top: 24px; font-size: 14px; color: var(--text-muted);">
             <div style="display: flex; justify-content: space-between;">
                 <span><i class="fa-regular fa-clock" style="margin-right: 8px;"></i>រយៈពេលសិក្សា</span>
                 <strong style="color: var(--text-main);"><?php echo esc_html( $duration ? $duration : 'Self-Paced' ); ?></strong>
