@@ -146,8 +146,8 @@
         }
 
         .profile-menu-link:hover {
-            background: rgba(255, 255, 255, 0.03);
-            color: #ffffff;
+            background: rgba(15, 23, 42, 0.04);
+            color: var(--color-primary);
         }
     </style>
 </head>
