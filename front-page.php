@@ -7,7 +7,7 @@ get_header();
     <div class="container">
         <span class="badge" style="background: rgba(229, 47, 46, 0.1); color: var(--color-primary); padding: 8px 16px; border-radius: 50px; font-weight: 600; font-size: 13.5px; border: 1px solid rgba(229, 47, 46, 0.2); letter-spacing: 0.5px; text-transform: uppercase;">🚀 CUSTOM LMS FOR REANDAILY</span>
         <h1 style="font-size: 52px; font-weight: 800; margin: 24px 0 16px; font-family: var(--font-heading); background: linear-gradient(135deg, var(--text-main) 50%, var(--text-muted) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            រៀនជំនាញអាយធីពីអ្នកជំនាញ
+            រៀនជំនាញអាយធីពីអ្នកជំនាញ <!-- RD-UPDATER-TEST-V1.0.1 -->
         </h1>
         <p style="color: var(--text-muted); font-size: 19px; max-width: 650px; margin: 0 auto 40px auto; font-family: var(--font-khmer);">
             វេទិកាសិក្សាអនឡាញ ដែលត្រូវបានរចនាឡើងយ៉ាងពិសេសសម្រាប់ការរៀនបច្ចេកវិទ្យា និងអភិវឌ្ឍន៍ជំនាញពិតប្រាកដ។

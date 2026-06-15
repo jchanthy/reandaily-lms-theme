@@ -440,7 +440,8 @@ class ReanDaily_LMS_Theme_Updater {
 
     public function __construct() {
         $this->theme_slug = 'reandaily-lms-theme';
-        $this->version    = '1.0.0';
+        $theme            = wp_get_theme( $this->theme_slug );
+        $this->version    = $theme->exists() ? $theme->get( 'Version' ) : '1.0.0';
         $this->repo       = 'jchanthy/reandaily-lms-theme';
 
         add_filter( 'pre_set_site_transient_update_themes', array( $this, 'check_update' ) );
