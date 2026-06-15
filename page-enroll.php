@@ -183,7 +183,7 @@ if ( ! empty( $bakong_id ) ) {
         flex-direction: column;
         align-items: center;
         padding: 30px;
-        border: 2px dashed var(--border-color);
+        border: 2px dashed #cbd5e1;
         border-radius: var(--border-radius-sm);
         cursor: pointer;
         background: rgba(255, 255, 255, 0.02);

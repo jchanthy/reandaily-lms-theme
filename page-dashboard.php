@@ -250,7 +250,7 @@ $enrollments = $wpdb->get_results( $wpdb->prepare(
 
         <?php else : ?>
             <!-- Empty state -->
-            <div style="grid-column: 1 / -1; background-color: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--border-radius-md); padding: 80px 24px; text-align: center; color: var(--text-muted);">
+            <div style="grid-column: 1 / -1; background-color: var(--bg-card); border: 1px dashed #e2e8f0; border-radius: var(--border-radius-md); padding: 80px 24px; text-align: center; color: var(--text-muted);">
                 <i class="fa-regular fa-folder-open" style="font-size: 64px; color: var(--color-primary); margin-bottom: 20px;"></i>
                 <h3 style="font-size: 22px; color: #ffffff; margin-bottom: 8px;"><?php _e( 'មិនទាន់មានវគ្គសិក្សានៅឡើយទេ', 'reandaily-lms-theme' ); ?></h3>
                 <p style="font-size: 15px; margin-bottom: 30px;"><?php _e( 'You haven\'t enrolled in any courses yet. Browse catalog to start learning!', 'reandaily-lms-theme' ); ?></p>
