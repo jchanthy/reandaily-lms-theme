@@ -439,13 +439,39 @@ class ReanDaily_LMS_Theme_Updater {
     private $repo;
 
     public function __construct() {
-        $this->theme_slug = 'reandaily-lms-theme';
+        $this->theme_slug = get_template();
         $theme            = wp_get_theme( $this->theme_slug );
         $this->version    = $theme->exists() ? $theme->get( 'Version' ) : '1.0.0';
         $this->repo       = 'jchanthy/reandaily-lms-theme';
 
         add_filter( 'pre_set_site_transient_update_themes', array( $this, 'check_update' ) );
         add_filter( 'upgrader_post_install', array( $this, 'post_install' ), 10, 3 );
+
+        if ( is_admin() ) {
+            add_action( 'admin_init', array( $this, 'clear_transient' ) );
+            add_action( 'admin_notices', array( $this, 'debug_notice' ) );
+        }
+    }
+
+    public function clear_transient() {
+        global $pagenow;
+        if ( $pagenow === 'update-core.php' && isset( $_GET['force-check'] ) && $_GET['force-check'] == '1' ) {
+            delete_site_transient( 'update_themes' );
+        }
+    }
+
+    public function debug_notice() {
+        if ( isset( $_GET['debug_updater'] ) ) {
+            $response = wp_remote_get( "https://api.github.com/repos/{$this->repo}/releases/latest", array(
+                'headers' => array( 'User-Agent' => 'WordPress/' . get_bloginfo('version') )
+            ) );
+            $remote = 'Error/Unknown';
+            if ( ! is_wp_error( $response ) ) {
+                $release = json_decode( wp_remote_retrieve_body( $response ), true );
+                $remote = isset( $release['tag_name'] ) ? $release['tag_name'] : 'No tag';
+            }
+            echo "<div class='notice notice-info'><p><strong>Git Updater Debug:</strong> Local: {$this->version} | Remote: {$remote} | Slug: {$this->theme_slug} | Repo: {$this->repo}</p></div>";
+        }
     }
 
     public function check_update( $transient ) {
