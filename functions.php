@@ -444,7 +444,7 @@ class ReanDaily_LMS_Theme_Updater {
         $this->version    = $theme->exists() ? $theme->get( 'Version' ) : '1.0.0';
         $this->repo       = 'jchanthy/reandaily-lms-theme';
 
-        add_filter( 'pre_set_site_transient_update_themes', array( $this, 'check_update' ) );
+        add_filter( 'site_transient_update_themes', array( $this, 'check_update' ) );
         add_filter( 'upgrader_post_install', array( $this, 'post_install' ), 10, 3 );
 
         if ( is_admin() ) {
