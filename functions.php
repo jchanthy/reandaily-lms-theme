@@ -430,3 +430,75 @@ function ajax_reandaily_lms_check_status() {
     wp_send_json_success( array( 'status' => $status ) );
 }
 add_action( 'wp_ajax_reandaily_lms_check_status', 'ajax_reandaily_lms_check_status' );
+
+
+// ── 7. SELF-CONTAINED GITHUB THEME UPDATER ───────────────────────────────────
+class ReanDaily_LMS_Theme_Updater {
+    private $theme_slug;
+    private $version;
+    private $repo;
+
+    public function __construct() {
+        $this->theme_slug = 'reandaily-lms-theme';
+        $this->version    = '1.0.0';
+        $this->repo       = 'jchanthy/reandaily-lms-theme';
+
+        add_filter( 'pre_set_site_transient_update_themes', array( $this, 'check_update' ) );
+        add_filter( 'upgrader_post_install', array( $this, 'post_install' ), 10, 3 );
+    }
+
+    public function check_update( $transient ) {
+        if ( empty( $transient->checked ) ) {
+            return $transient;
+        }
+
+        // Fetch latest release details from GitHub API
+        $response = wp_remote_get( "https://api.github.com/repos/{$this->repo}/releases/latest", array(
+            'headers' => array( 'User-Agent' => 'WordPress/' . get_bloginfo('version') )
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            return $transient;
+        }
+
+        $release = json_decode( wp_remote_retrieve_body( $response ), true );
+        if ( empty( $release ) || empty( $release['tag_name'] ) ) {
+            return $transient;
+        }
+
+        $remote_version = ltrim( $release['tag_name'], 'v' );
+
+        // If newer version is available, push notification variables to transient
+        if ( version_compare( $this->version, $remote_version, '<' ) ) {
+            $transient->response[ $this->theme_slug ] = array(
+                'theme'       => $this->theme_slug,
+                'new_version' => $remote_version,
+                'url'         => $release['html_url'],
+                'package'     => $release['zipball_url'],
+            );
+        }
+
+        return $transient;
+    }
+
+    public function post_install( $true, $hook_extra, $result ) {
+        // Only run this cleanup on our theme
+        if ( isset( $hook_extra['theme'] ) && $hook_extra['theme'] === $this->theme_slug ) {
+            global $wp_filesystem;
+            $destination = $result['destination'];
+            $correct_dir = trailingslashit( dirname( $destination ) ) . $this->theme_slug;
+
+            if ( $destination !== $correct_dir ) {
+                if ( $wp_filesystem->exists( $correct_dir ) ) {
+                    $wp_filesystem->delete( $correct_dir, true );
+                }
+                if ( $wp_filesystem->move( $destination, $correct_dir ) ) {
+                    $result['destination'] = $correct_dir;
+                }
+            }
+        }
+        return $result;
+    }
+}
+new ReanDaily_LMS_Theme_Updater();
+
