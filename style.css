@@ -4,7 +4,7 @@ Theme URI: https://reandaily.com/
 GitHub Theme URI: jchanthy/reandaily-lms-theme
 Primary Branch: main
 Description: A custom, lightweight, high-performance Learning Management System theme built from scratch for ReanDaily. Fully integrated with KHQR/ABA payment gateways and a distraction-free custom classroom player.
-Version: 1.1.4
+Version: 1.1.5
 Author: Antigravity
 Author URI: https://reandaily.com/
 Text Domain: reandaily-lms-theme
@@ -103,6 +103,20 @@ h1 *, h2 *, h3 *, h4 *, h5 *, h6 *,
 /* Protect FontAwesome icons from any font overrides */
 .fa, .fa-solid, .fa-regular, .fa-brands, [class^="fa-"], [class*=" fa-"] {
     font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands' !important;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+.fa-solid, .fa {
+    font-weight: 900 !important;
+}
+.fa-regular {
+    font-weight: 400 !important;
+}
+.fa-brands {
+    font-weight: 400 !important;
+    font-family: 'Font Awesome 6 Brands' !important;
 }
 
 a {
