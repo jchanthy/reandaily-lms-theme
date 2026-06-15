@@ -99,7 +99,6 @@ if ( ! empty( $bakong_id ) ) {
         grid-template-columns: 1.2fr 1fr;
         gap: 48px;
         padding: 60px 24px;
-        font-family: var(--font-primary);
         align-items: start;
     }
 

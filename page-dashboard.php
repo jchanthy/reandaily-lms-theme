@@ -28,19 +28,18 @@ $enrollments = $wpdb->get_results( $wpdb->prepare(
     .dashboard-wrap {
         padding: 60px 24px;
         min-height: 70vh;
-        font-family: var(--font-primary);
     }
 
     .welcome-card {
-        background: linear-gradient(135deg, var(--bg-card), rgba(21, 27, 44, 0.6));
-        border: 1px solid var(--border-color);
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: var(--border-radius-md);
         padding: 32px;
         display: flex;
         align-items: center;
         gap: 24px;
         margin-bottom: 48px;
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow-md);
     }
 
     .welcome-avatar {
@@ -152,7 +151,7 @@ $enrollments = $wpdb->get_results( $wpdb->prepare(
         <img src="<?php echo esc_url( get_avatar_url( $user_id ) ); ?>" alt="Avatar" class="welcome-avatar">
         <div>
             <h1 style="font-size: 28px; font-weight: 800; color: #ffffff;"><?php echo esc_html( $current_user->display_name ); ?></h1>
-            <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px; font-family: var(--font-khmer);">
+            <p style="color: #94a3b8; font-size: 14px; margin-top: 4px; font-family: var(--font-khmer);">
                 សមាជិកសិក្សា ReanDaily តាំងពី៖ <?php echo date_i18n( get_option( 'date_format' ), strtotime( $current_user->user_registered ) ); ?>
             </p>
         </div>
