@@ -4,7 +4,7 @@ Theme URI: https://reandaily.com/
 GitHub Theme URI: jchanthy/reandaily-lms-theme
 Primary Branch: main
 Description: A custom, lightweight, high-performance Learning Management System theme built from scratch for ReanDaily. Fully integrated with KHQR/ABA payment gateways and a distraction-free custom classroom player.
-Version: 1.0.7
+Version: 1.0.8
 Author: Antigravity
 Author URI: https://reandaily.com/
 Text Domain: reandaily-lms-theme
@@ -79,7 +79,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Khmer-specific formatting when text contains Khmer script */
-:lang(kh), :lang(km), .khmer-text {
+:lang(kh), :lang(km), .khmer-text,
+:lang(kh) input, :lang(kh) button, :lang(kh) select, :lang(kh) textarea, :lang(kh) label,
+:lang(km) input, :lang(km) button, :lang(km) select, :lang(km) textarea, :lang(km) label,
+input, button, select, textarea, label {
     font-family: var(--font-khmer);
 }
 
