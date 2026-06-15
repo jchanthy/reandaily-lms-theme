@@ -24,7 +24,7 @@ get_header();
                 $duration  = get_post_meta( $course_id, '_duration', true );
                 $level     = get_post_meta( $course_id, '_level', true );
                 ?>
-                <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); overflow: hidden; display: flex; flex-direction: column; transition: var(--transition-normal); box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='var(--shadow-md)'; this.style.borderColor='rgba(229, 47, 46, 0.2)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)'; this.style.borderColor='var(--border-color)';">
+                <div style="background-color: var(--bg-card); border: 1px solid transparent; border-radius: var(--border-radius-md); overflow: hidden; display: flex; flex-direction: column; transition: var(--transition-normal); box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)';">
                     <!-- Image -->
                     <div style="position: relative; padding-top: 56.25%; background-color: #0b0f19;">
                         <?php if ( has_post_thumbnail() ) : ?>

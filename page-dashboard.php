@@ -58,7 +58,7 @@ $enrollments = $wpdb->get_results( $wpdb->prepare(
 
     .dashboard-course-card {
         background-color: var(--bg-card);
-        border: 1px solid var(--border-color);
+        border: 1px solid transparent;
         border-radius: var(--border-radius-md);
         overflow: hidden;
         display: flex;
@@ -70,7 +70,6 @@ $enrollments = $wpdb->get_results( $wpdb->prepare(
     .dashboard-course-card:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-md);
-        border-color: rgba(229, 47, 46, 0.2);
     }
 
     .badge-status {
