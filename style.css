@@ -4,7 +4,7 @@ Theme URI: https://reandaily.com/
 GitHub Theme URI: jchanthy/reandaily-lms-theme
 Primary Branch: main
 Description: A custom, lightweight, high-performance Learning Management System theme built from scratch for ReanDaily. Fully integrated with KHQR/ABA payment gateways and a distraction-free custom classroom player.
-Version: 1.0.9
+Version: 1.1.0
 Author: Antigravity
 Author URI: https://reandaily.com/
 Text Domain: reandaily-lms-theme
@@ -22,8 +22,10 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
     --font-khmer-heading: 'Kantumruy Pro', sans-serif;
 
     /* Color Palette */
-    --color-primary: #E52F2E;        /* Branding Red */
-    --color-primary-hover: #c42221;
+    --color-primary: #FFB800;        /* Branding Yellow */
+    --color-primary-hover: #E0A200;
+    --color-primary-rgb: 255, 184, 0;
+    --color-on-primary: #0f172a;     /* Dark text on yellow background */
     --color-secondary: #007bff;      /* Accent Blue */
     --color-success: #10b981;        /* Completed/Success Green */
     --color-warning: #f59e0b;
