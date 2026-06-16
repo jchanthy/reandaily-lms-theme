@@ -19,10 +19,10 @@ function reandaily_lms_enqueue_assets() {
     wp_enqueue_style( 'reandaily-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Kantumruy:wght@300;400;700&family=Kantumruy+Pro:wght@500;700&display=swap', array(), null );
     
     // Main Stylesheet
-    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.1.7' );
+    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.1.8' );
 
     // FontAwesome for UI icons
-    wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0' );
+    wp_enqueue_style( 'font-awesome', 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css', array(), '6.4.0' );
 
     // Load QRCode.js library for checkout page
     if ( is_page_template( 'page-enroll.php' ) || is_page( 'enroll' ) ) {
