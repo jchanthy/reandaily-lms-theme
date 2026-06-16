@@ -19,7 +19,7 @@ function reandaily_lms_enqueue_assets() {
     wp_enqueue_style( 'reandaily-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Kantumruy:wght@300;400;700&family=Kantumruy+Pro:wght@500;700&display=swap', array(), null );
     
     // Main Stylesheet
-    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.1.9' );
+    wp_enqueue_style( 'reandaily-style', get_stylesheet_uri(), array(), '1.2.0' );
 
     // FontAwesome for UI icons
     wp_enqueue_style( 'font-awesome', 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css', array(), '6.4.0' );
@@ -155,10 +155,10 @@ function reandaily_lms_register_cpts() {
         ),
         'public'      => true,
         'has_archive' => true,
-        'supports'    => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'supports'    => array( 'title', 'thumbnail' ),
         'menu_icon'   => 'dashicons-welcome-learn-more',
         'rewrite'     => array( 'slug' => 'courses' ),
-        'show_in_rest'=> true,
+        'show_in_rest'=> false,
     ) );
 
     // Lessons Custom Post Type
@@ -172,10 +172,10 @@ function reandaily_lms_register_cpts() {
         ),
         'public'      => true,
         'has_archive' => false,
-        'supports'    => array( 'title', 'editor', 'thumbnail' ),
+        'supports'    => array( 'title' ),
         'menu_icon'   => 'dashicons-playlist-video',
         'rewrite'     => array( 'slug' => 'lessons' ),
-        'show_in_rest'=> true,
+        'show_in_rest'=> false,
     ) );
 }
 add_action( 'init', 'reandaily_lms_register_cpts' );
@@ -715,13 +715,13 @@ function reandaily_lms_get_dashboard_url() {
 }
 
 
-// ── 15. COURSE & LESSON METABOXES & SYLLABUS BUILDER ─────────────────────────
+// ── 15. COURSE & LESSON METABOXES & TABBED BUILDERS ─────────────────────────
 
 // Enqueue Admin Scripts for Course/Lesson Manager
 function reandaily_lms_admin_enqueue( $hook ) {
     global $post;
     if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
-        if ( $post && 'courses' === get_post_type( $post ) ) {
+        if ( $post && ( 'courses' === get_post_type( $post ) || 'lessons' === get_post_type( $post ) ) ) {
             wp_enqueue_script( 'jquery-ui-sortable' );
         }
     }
@@ -731,18 +731,18 @@ add_action( 'admin_enqueue_scripts', 'reandaily_lms_admin_enqueue' );
 // Register Metaboxes
 function reandaily_lms_register_metaboxes() {
     add_meta_box(
-        'reandaily_lms_course_settings',
-        __( 'Course Settings & Syllabus Builder', 'reandaily-lms-theme' ),
-        'reandaily_lms_course_metabox_html',
+        'reandaily_lms_course_builder',
+        __( 'Course Builder & Settings', 'reandaily-lms-theme' ),
+        'reandaily_lms_course_builder_html',
         'courses',
         'normal',
         'high'
     );
 
     add_meta_box(
-        'reandaily_lms_lesson_settings',
-        __( 'Lesson Settings', 'reandaily-lms-theme' ),
-        'reandaily_lms_lesson_metabox_html',
+        'reandaily_lms_lesson_builder',
+        __( 'Lesson Settings & Content', 'reandaily-lms-theme' ),
+        'reandaily_lms_lesson_builder_html',
         'lessons',
         'normal',
         'high'
@@ -750,153 +750,313 @@ function reandaily_lms_register_metaboxes() {
 }
 add_action( 'add_meta_boxes', 'reandaily_lms_register_metaboxes' );
 
-// Course Settings Metabox HTML
-function reandaily_lms_course_metabox_html( $post ) {
+// Course Builder Metabox HTML (Tabbed)
+function reandaily_lms_course_builder_html( $post ) {
     wp_nonce_field( 'reandaily_lms_save_course_meta', 'reandaily_lms_course_meta_nonce' );
 
     $price = get_post_meta( $post->ID, '_price', true );
     $price_khr = get_post_meta( $post->ID, '_price_khr', true );
     $duration = get_post_meta( $post->ID, '_duration', true );
     $level = get_post_meta( $post->ID, '_level', true );
+    $trailer_url = get_post_meta( $post->ID, '_trailer_url', true );
     
     $lessons_order = get_post_meta( $post->ID, '_lessons_order', true );
     if ( ! is_array( $lessons_order ) ) {
         $lessons_order = array();
     }
 
-    // Fetch all published lessons
     $lessons = get_posts( array(
         'post_type'      => 'lessons',
         'posts_per_page' => -1,
         'post_status'    => 'publish',
     ) );
+
+    $course_description = get_post_field( 'post_content', $post->ID );
     ?>
     <style>
-        .lms-meta-row {
+        .lms-builder-container {
             display: flex;
-            margin-bottom: 16px;
-            align-items: center;
-        }
-        .lms-meta-row label {
-            width: 150px;
-            font-weight: bold;
-        }
-        .lms-meta-row input[type="text"],
-        .lms-meta-row select {
-            flex-grow: 1;
-            padding: 8px;
-            max-width: 400px;
-        }
-        .lms-syllabus-manager {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .lms-syllabus-column {
-            flex: 1;
-            background: #f6f7f7;
+            background: #fff;
             border: 1px solid #ccd0d4;
             border-radius: 4px;
-            padding: 12px;
-            min-height: 250px;
+            margin-top: 10px;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
         }
-        .lms-syllabus-column h4 {
-            margin: 0 0 10px 0;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #ccd0d4;
+        .lms-builder-tabs {
+            width: 220px;
+            background: #f6f7f7;
+            border-right: 1px solid #ccd0d4;
+            display: flex;
+            flex-direction: column;
+        }
+        .lms-builder-tab-btn {
+            padding: 16px 20px;
             font-size: 14px;
+            font-weight: 600;
+            color: #444;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e5e5;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            outline: none;
+        }
+        .lms-builder-tab-btn:hover {
+            background: #f0f0f1;
+            color: #2271b1;
+        }
+        .lms-builder-tab-btn.active {
+            background: #fff;
+            color: #2271b1;
+            border-left: 4px solid #2271b1;
+            padding-left: 16px;
+        }
+        .lms-builder-tab-btn .dashicons {
+            color: #646970;
+        }
+        .lms-builder-tab-btn.active .dashicons {
+            color: #2271b1;
+        }
+        .lms-builder-panels {
+            flex: 1;
+            padding: 28px;
+            min-height: 450px;
+            background: #fff;
+        }
+        .lms-builder-panel {
+            display: none;
+        }
+        .lms-builder-panel.active {
+            display: block;
+        }
+        .lms-builder-row {
+            margin-bottom: 24px;
+        }
+        .lms-builder-row label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13.5px;
+            color: #1d2327;
+        }
+        .lms-builder-row input[type="text"],
+        .lms-builder-row select {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            border: 1px solid #8c8f94;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .lms-builder-row input[type="text"]:focus,
+        .lms-builder-row select:focus {
+            border-color: #2271b1;
+            box-shadow: 0 0 0 1px #2271b1;
+            outline: 2px solid transparent;
+        }
+        .lms-syllabus-columns {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .lms-syllabus-col {
+            flex: 1;
+            background: #f8f9fa;
+            border: 1px solid #dcdcde;
+            border-radius: 4px;
+            padding: 16px;
+            min-height: 300px;
+        }
+        .lms-syllabus-col h4 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1d2327;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dcdcde;
         }
         .lms-lesson-list {
             list-style: none;
             margin: 0;
             padding: 0;
-            min-height: 200px;
+            min-height: 250px;
         }
         .lms-lesson-item {
             background: #fff;
             border: 1px solid #ccd0d4;
-            border-radius: 3px;
-            padding: 8px 12px;
+            border-radius: 4px;
+            padding: 10px 14px;
             margin-bottom: 8px;
             cursor: move;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            font-size: 13px;
         }
         .lms-lesson-item .dashicons-menu {
             color: #8c8f94;
-            cursor: move;
+        }
+        .ui-state-highlight {
+            border: 2px dashed #2271b1;
+            background: #f0f6fc;
+            min-height: 40px;
+            margin-bottom: 8px;
+            border-radius: 4px;
         }
     </style>
 
-    <div class="lms-meta-row">
-        <label for="lms_price"><?php _e( 'Price (USD)', 'reandaily-lms-theme' ); ?></label>
-        <input type="text" id="lms_price" name="lms_price" value="<?php echo esc_attr( $price ); ?>" placeholder="e.g. 19.99">
-    </div>
-    <div class="lms-meta-row">
-        <label for="lms_price_khr"><?php _e( 'Price (KHR)', 'reandaily-lms-theme' ); ?></label>
-        <input type="text" id="lms_price_khr" name="lms_price_khr" value="<?php echo esc_attr( $price_khr ); ?>" placeholder="e.g. 80000">
-    </div>
-    <div class="lms-meta-row">
-        <label for="lms_duration"><?php _e( 'Duration', 'reandaily-lms-theme' ); ?></label>
-        <input type="text" id="lms_duration" name="lms_duration" value="<?php echo esc_attr( $duration ); ?>" placeholder="e.g. 10 Hours, 3 Weeks">
-    </div>
-    <div class="lms-meta-row">
-        <label for="lms_level"><?php _e( 'Difficulty Level', 'reandaily-lms-theme' ); ?></label>
-        <select id="lms_level" name="lms_level">
-            <option value="All Levels" <?php selected( $level, 'All Levels' ); ?>><?php _e( 'All Levels', 'reandaily-lms-theme' ); ?></option>
-            <option value="Beginner" <?php selected( $level, 'Beginner' ); ?>><?php _e( 'Beginner', 'reandaily-lms-theme' ); ?></option>
-            <option value="Intermediate" <?php selected( $level, 'Intermediate' ); ?>><?php _e( 'Intermediate', 'reandaily-lms-theme' ); ?></option>
-            <option value="Advanced" <?php selected( $level, 'Advanced' ); ?>><?php _e( 'Advanced', 'reandaily-lms-theme' ); ?></option>
-        </select>
-    </div>
-
-    <h3><?php _e( 'Syllabus Builder (Drag & Drop)', 'reandaily-lms-theme' ); ?></h3>
-    <p class="description"><?php _e( 'Drag lessons from the left (Unassigned) to the right (Course Syllabus) to assign and order them.', 'reandaily-lms-theme' ); ?></p>
-    
-    <div class="lms-syllabus-manager">
-        <!-- Unassigned Lessons -->
-        <div class="lms-syllabus-column">
-            <h4><?php _e( 'Unassigned Lessons', 'reandaily-lms-theme' ); ?></h4>
-            <ul id="lms-unassigned-lessons" class="lms-lesson-list">
-                <?php
-                foreach ( $lessons as $lesson ) {
-                    if ( in_array( $lesson->ID, $lessons_order ) ) {
-                        continue;
-                    }
-                    echo '<li class="lms-lesson-item" data-id="' . esc_attr( $lesson->ID ) . '">';
-                    echo '<span class="dashicons dashicons-menu"></span>';
-                    echo '<span>' . esc_html( $lesson->post_title ) . '</span>';
-                    echo '</li>';
-                }
-                ?>
-            </ul>
+    <div class="lms-builder-container">
+        <!-- Vertical Tab List -->
+        <div class="lms-builder-tabs">
+            <button type="button" class="lms-builder-tab-btn active" data-target="course-general">
+                <span class="dashicons dashicons-admin-generic"></span> <?php _e( 'General', 'reandaily-lms-theme' ); ?>
+            </button>
+            <button type="button" class="lms-builder-tab-btn" data-target="course-description">
+                <span class="dashicons dashicons-editor-paragraph"></span> <?php _e( 'Description', 'reandaily-lms-theme' ); ?>
+            </button>
+            <button type="button" class="lms-builder-tab-btn" data-target="course-pricing">
+                <span class="dashicons dashicons-cart"></span> <?php _e( 'Pricing', 'reandaily-lms-theme' ); ?>
+            </button>
+            <button type="button" class="lms-builder-tab-btn" data-target="course-syllabus">
+                <span class="dashicons dashicons-playlist-video"></span> <?php _e( 'Curriculum', 'reandaily-lms-theme' ); ?>
+            </button>
+            <button type="button" class="lms-builder-tab-btn" data-target="course-media">
+                <span class="dashicons dashicons-format-video"></span> <?php _e( 'Media Settings', 'reandaily-lms-theme' ); ?>
+            </button>
         </div>
 
-        <!-- Course Syllabus -->
-        <div class="lms-syllabus-column">
-            <h4><?php _e( 'Course Syllabus (Ordered)', 'reandaily-lms-theme' ); ?></h4>
-            <ul id="lms-course-lessons" class="lms-lesson-list">
+        <!-- Panels Container -->
+        <div class="lms-builder-panels">
+            <!-- 1. General Panel -->
+            <div id="course-general" class="lms-builder-panel active">
+                <h3><?php _e( 'General Course Information', 'reandaily-lms-theme' ); ?></h3>
+                <hr style="border: 0; border-top: 1px solid #dcdcde; margin: 16px 0 24px 0;">
+                
+                <div class="lms-builder-row">
+                    <label for="lms_duration"><?php _e( 'Course Duration', 'reandaily-lms-theme' ); ?></label>
+                    <input type="text" id="lms_duration" name="lms_duration" value="<?php echo esc_attr( $duration ); ?>" placeholder="e.g. 10 Hours, 4 Weeks">
+                </div>
+
+                <div class="lms-builder-row">
+                    <label for="lms_level"><?php _e( 'Difficulty Level', 'reandaily-lms-theme' ); ?></label>
+                    <select id="lms_level" name="lms_level">
+                        <option value="All Levels" <?php selected( $level, 'All Levels' ); ?>><?php _e( 'All Levels', 'reandaily-lms-theme' ); ?></option>
+                        <option value="Beginner" <?php selected( $level, 'Beginner' ); ?>><?php _e( 'Beginner', 'reandaily-lms-theme' ); ?></option>
+                        <option value="Intermediate" <?php selected( $level, 'Intermediate' ); ?>><?php _e( 'Intermediate', 'reandaily-lms-theme' ); ?></option>
+                        <option value="Advanced" <?php selected( $level, 'Advanced' ); ?>><?php _e( 'Advanced', 'reandaily-lms-theme' ); ?></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 2. Description Panel (Rich Editor) -->
+            <div id="course-description" class="lms-builder-panel">
+                <h3><?php _e( 'Course Syllabus / Description', 'reandaily-lms-theme' ); ?></h3>
+                <hr style="border: 0; border-top: 1px solid #dcdcde; margin: 16px 0 24px 0;">
+                
                 <?php
-                foreach ( $lessons_order as $lesson_id ) {
-                    $lesson_post = get_post( $lesson_id );
-                    if ( $lesson_post && $lesson_post->post_status === 'publish' ) {
-                        echo '<li class="lms-lesson-item" data-id="' . esc_attr( $lesson_id ) . '">';
-                        echo '<span class="dashicons dashicons-menu"></span>';
-                        echo '<span>' . esc_html( $lesson_post->post_title ) . '</span>';
-                        echo '</li>';
-                    }
-                }
+                wp_editor( $course_description, 'lms_course_description', array(
+                    'textarea_name' => 'lms_course_description',
+                    'media_buttons' => true,
+                    'textarea_rows' => 15,
+                    'tinymce'       => true
+                ) );
                 ?>
-            </ul>
+            </div>
+
+            <!-- 3. Pricing Panel -->
+            <div id="course-pricing" class="lms-builder-panel">
+                <h3><?php _e( 'Course Pricing Settings', 'reandaily-lms-theme' ); ?></h3>
+                <hr style="border: 0; border-top: 1px solid #dcdcde; margin: 16px 0 24px 0;">
+
+                <div class="lms-builder-row">
+                    <label for="lms_price"><?php _e( 'USD Price ($)', 'reandaily-lms-theme' ); ?></label>
+                    <input type="text" id="lms_price" name="lms_price" value="<?php echo esc_attr( $price ); ?>" placeholder="e.g. 19.99 (Set 0 for free)">
+                </div>
+
+                <div class="lms-builder-row">
+                    <label for="lms_price_khr"><?php _e( 'KHR Price (៛)', 'reandaily-lms-theme' ); ?></label>
+                    <input type="text" id="lms_price_khr" name="lms_price_khr" value="<?php echo esc_attr( $price_khr ); ?>" placeholder="e.g. 80000">
+                </div>
+            </div>
+
+            <!-- 4. Curriculum Builder -->
+            <div id="course-syllabus" class="lms-builder-panel">
+                <h3><?php _e( 'Drag & Drop Course Curriculum', 'reandaily-lms-theme' ); ?></h3>
+                <p class="description"><?php _e( 'Drag lessons from the left list to the right list to include and sequence them in the course syllabus.', 'reandaily-lms-theme' ); ?></p>
+                <hr style="border: 0; border-top: 1px solid #dcdcde; margin: 16px 0 20px 0;">
+
+                <div class="lms-syllabus-columns">
+                    <div class="lms-syllabus-col">
+                        <h4><?php _e( 'Available Lessons', 'reandaily-lms-theme' ); ?></h4>
+                        <ul id="lms-unassigned-lessons" class="lms-lesson-list">
+                            <?php
+                            foreach ( $lessons as $lesson ) {
+                                if ( in_array( $lesson->ID, $lessons_order ) ) {
+                                    continue;
+                                }
+                                echo '<li class="lms-lesson-item" data-id="' . esc_attr( $lesson->ID ) . '">';
+                                echo '<span class="dashicons dashicons-menu"></span>';
+                                echo '<span>' . esc_html( $lesson->post_title ) . '</span>';
+                                echo '</li>';
+                            }
+                            ?>
+                        </ul>
+                    </div>
+
+                    <div class="lms-syllabus-col">
+                        <h4><?php _e( 'Course Syllabus (Syllabus)', 'reandaily-lms-theme' ); ?></h4>
+                        <ul id="lms-course-lessons" class="lms-lesson-list">
+                            <?php
+                            foreach ( $lessons_order as $lesson_id ) {
+                                $lesson_post = get_post( $lesson_id );
+                                if ( $lesson_post && $lesson_post->post_status === 'publish' ) {
+                                    echo '<li class="lms-lesson-item" data-id="' . esc_attr( $lesson_id ) . '">';
+                                    echo '<span class="dashicons dashicons-menu"></span>';
+                                    echo '<span>' . esc_html( $lesson_post->post_title ) . '</span>';
+                                    echo '</li>';
+                                }
+                            }
+                            ?>
+                        </ul>
+                    </div>
+                </div>
+
+                <input type="hidden" id="lms_lessons_order_input" name="lms_lessons_order" value="<?php echo esc_attr( implode( ',', $lessons_order ) ); ?>">
+            </div>
+
+            <!-- 5. Media Panel -->
+            <div id="course-media" class="lms-builder-panel">
+                <h3><?php _e( 'Course Promotion Media', 'reandaily-lms-theme' ); ?></h3>
+                <hr style="border: 0; border-top: 1px solid #dcdcde; margin: 16px 0 24px 0;">
+
+                <div class="lms-builder-row">
+                    <label for="lms_trailer_url"><?php _e( 'Promo/Trailer Video URL', 'reandaily-lms-theme' ); ?></label>
+                    <input type="text" id="lms_trailer_url" name="lms_trailer_url" value="<?php echo esc_url( $trailer_url ); ?>" placeholder="e.g. YouTube or Vimeo trailer video URL">
+                    <p class="description"><?php _e( 'This video will appear as the course preview video for prospective students.', 'reandaily-lms-theme' ); ?></p>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- Hidden input to store lesson IDs in order -->
-    <input type="hidden" id="lms_lessons_order_input" name="lms_lessons_order" value="<?php echo esc_attr( implode( ',', $lessons_order ) ); ?>">
 
     <script>
         jQuery(document).ready(function($) {
+            // Tab switching logic
+            $('.lms-builder-tab-btn').on('click', function() {
+                var target = $(this).data('target');
+                $('.lms-builder-tab-btn').removeClass('active');
+                $('.lms-builder-panel').removeClass('active');
+                
+                $(this).addClass('active');
+                $('#' + target).addClass('active');
+            });
+
+            // Initialize Sortable syllabus Columns
             $("#lms-unassigned-lessons, #lms-course-lessons").sortable({
                 connectWith: ".lms-lesson-list",
                 placeholder: "ui-state-highlight",
@@ -913,50 +1073,165 @@ function reandaily_lms_course_metabox_html( $post ) {
     <?php
 }
 
-// Lesson Settings Metabox HTML
-function reandaily_lms_lesson_metabox_html( $post ) {
+// Lesson Settings & Content Builder HTML (Tabbed)
+function reandaily_lms_lesson_builder_html( $post ) {
     wp_nonce_field( 'reandaily_lms_save_lesson_meta', 'reandaily_lms_lesson_meta_nonce' );
 
     $video_url = get_post_meta( $post->ID, '_video_url', true );
     $duration = get_post_meta( $post->ID, '_duration', true );
     $is_preview = get_post_meta( $post->ID, '_is_preview', true );
+    $lesson_content = get_post_field( 'post_content', $post->ID );
     ?>
     <style>
-        .lms-meta-row {
+        .lms-builder-container {
             display: flex;
-            margin-bottom: 16px;
+            background: #fff;
+            border: 1px solid #ccd0d4;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+        }
+        .lms-builder-tabs {
+            width: 220px;
+            background: #f6f7f7;
+            border-right: 1px solid #ccd0d4;
+            display: flex;
+            flex-direction: column;
+        }
+        .lms-builder-tab-btn {
+            padding: 16px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #444;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e5e5;
+            transition: all 0.15s ease;
+            display: flex;
             align-items: center;
+            gap: 10px;
+            outline: none;
         }
-        .lms-meta-row label {
-            width: 150px;
-            font-weight: bold;
+        .lms-builder-tab-btn:hover {
+            background: #f0f0f1;
+            color: #2271b1;
         }
-        .lms-meta-row input[type="text"],
-        .lms-meta-row input[type="checkbox"] {
-            flex-grow: 1;
-            padding: 8px;
-            max-width: 400px;
+        .lms-builder-tab-btn.active {
+            background: #fff;
+            color: #2271b1;
+            border-left: 4px solid #2271b1;
+            padding-left: 16px;
         }
-        .lms-meta-row input[type="checkbox"] {
+        .lms-builder-tab-btn .dashicons {
+            color: #646970;
+        }
+        .lms-builder-tab-btn.active .dashicons {
+            color: #2271b1;
+        }
+        .lms-builder-panels {
+            flex: 1;
+            padding: 28px;
+            min-height: 450px;
+            background: #fff;
+        }
+        .lms-builder-panel {
+            display: none;
+        }
+        .lms-builder-panel.active {
+            display: block;
+        }
+        .lms-builder-row {
+            margin-bottom: 24px;
+        }
+        .lms-builder-row label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13.5px;
+            color: #1d2327;
+        }
+        .lms-builder-row input[type="text"],
+        .lms-builder-row input[type="checkbox"] {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            border: 1px solid #8c8f94;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .lms-builder-row input[type="checkbox"] {
             width: auto;
-            flex-grow: 0;
             margin-top: 0;
         }
     </style>
 
-    <div class="lms-meta-row">
-        <label for="lms_video_url"><?php _e( 'Video URL', 'reandaily-lms-theme' ); ?></label>
-        <input type="text" id="lms_video_url" name="lms_video_url" value="<?php echo esc_url( $video_url ); ?>" placeholder="e.g. https://www.youtube.com/watch?v=... or MP4 URL">
+    <div class="lms-builder-container">
+        <!-- Vertical Tab List -->
+        <div class="lms-builder-tabs">
+            <button type="button" class="lms-builder-tab-btn active" data-target="lesson-content">
+                <span class="dashicons dashicons-editor-paragraph"></span> <?php _e( 'Lesson Content', 'reandaily-lms-theme' ); ?>
+            </button>
+            <button type="button" class="lms-builder-tab-btn" data-target="lesson-settings">
+                <span class="dashicons dashicons-admin-generic"></span> <?php _e( 'Video & Rules', 'reandaily-lms-theme' ); ?>
+            </button>
+        </div>
+
+        <!-- Panels Container -->
+        <div class="lms-builder-panels">
+            <!-- 1. Content Panel (Rich Editor) -->
+            <div id="lesson-content" class="lms-builder-panel active">
+                <h3><?php _e( 'Lesson Content description', 'reandaily-lms-theme' ); ?></h3>
+                <hr style="border: 0; border-top: 1px solid #dcdcde; margin: 16px 0 24px 0;">
+                
+                <?php
+                wp_editor( $lesson_content, 'lms_lesson_description', array(
+                    'textarea_name' => 'lms_lesson_description',
+                    'media_buttons' => true,
+                    'textarea_rows' => 15,
+                    'tinymce'       => true
+                ) );
+                ?>
+            </div>
+
+            <!-- 2. Settings Panel -->
+            <div id="lesson-settings" class="lms-builder-panel">
+                <h3><?php _e( 'Lesson Media & Preview Settings', 'reandaily-lms-theme' ); ?></h3>
+                <hr style="border: 0; border-top: 1px solid #dcdcde; margin: 16px 0 24px 0;">
+
+                <div class="lms-builder-row">
+                    <label for="lms_video_url"><?php _e( 'Video URL', 'reandaily-lms-theme' ); ?></label>
+                    <input type="text" id="lms_video_url" name="lms_video_url" value="<?php echo esc_url( $video_url ); ?>" placeholder="e.g. YouTube, Vimeo or MP4 file link">
+                    <p class="description"><?php _e( 'Video file or hosting platform link for this lesson.', 'reandaily-lms-theme' ); ?></p>
+                </div>
+
+                <div class="lms-builder-row">
+                    <label for="lms_lesson_duration"><?php _e( 'Lesson Duration', 'reandaily-lms-theme' ); ?></label>
+                    <input type="text" id="lms_lesson_duration" name="lms_lesson_duration" value="<?php echo esc_attr( $duration ); ?>" placeholder="e.g. 15 mins, 45 mins">
+                </div>
+
+                <div class="lms-builder-row" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="lms_is_preview" name="lms_is_preview" value="1" <?php checked( $is_preview, '1' ); ?>>
+                    <label for="lms_is_preview" style="margin-bottom:0; font-weight: normal; font-size: 13.5px;"><?php _e( 'Is Preview (Free lesson before enrollment)', 'reandaily-lms-theme' ); ?></label>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="lms-meta-row">
-        <label for="lms_lesson_duration"><?php _e( 'Duration', 'reandaily-lms-theme' ); ?></label>
-        <input type="text" id="lms_lesson_duration" name="lms_lesson_duration" value="<?php echo esc_attr( $duration ); ?>" placeholder="e.g. 15 mins, 30 mins">
-    </div>
-    <div class="lms-meta-row">
-        <label for="lms_is_preview"><?php _e( 'Is Preview Lesson', 'reandaily-lms-theme' ); ?></label>
-        <input type="checkbox" id="lms_is_preview" name="lms_is_preview" value="1" <?php checked( $is_preview, '1' ); ?>>
-        <span class="description"><?php _e( 'If checked, guests can view this lesson without purchasing the course.', 'reandaily-lms-theme' ); ?></span>
-    </div>
+
+    <script>
+        jQuery(document).ready(function($) {
+            $('.lms-builder-tab-btn').on('click', function() {
+                var target = $(this).data('target');
+                $('.lms-builder-tab-btn').removeClass('active');
+                $('.lms-builder-panel').removeClass('active');
+                
+                $(this).addClass('active');
+                $('#' + target).addClass('active');
+            });
+        });
+    </script>
     <?php
 }
 
@@ -969,7 +1244,7 @@ function reandaily_lms_save_metaboxes_data( $post_id ) {
         return;
     }
 
-    // Save Course Meta
+    // Save Course Builder fields
     if ( isset( $_POST['lms_course_meta_nonce'] ) && wp_verify_nonce( $_POST['lms_course_meta_nonce'], 'reandaily_lms_save_course_meta' ) ) {
         if ( isset( $_POST['lms_price'] ) ) {
             update_post_meta( $post_id, '_price', sanitize_text_field( $_POST['lms_price'] ) );
@@ -983,14 +1258,27 @@ function reandaily_lms_save_metaboxes_data( $post_id ) {
         if ( isset( $_POST['lms_level'] ) ) {
             update_post_meta( $post_id, '_level', sanitize_text_field( $_POST['lms_level'] ) );
         }
+        if ( isset( $_POST['lms_trailer_url'] ) ) {
+            update_post_meta( $post_id, '_trailer_url', esc_url_raw( $_POST['lms_trailer_url'] ) );
+        }
         if ( isset( $_POST['lms_lessons_order'] ) ) {
             $order_string = sanitize_text_field( $_POST['lms_lessons_order'] );
             $order_array = array_filter( array_map( 'intval', explode( ',', $order_string ) ) );
             update_post_meta( $post_id, '_lessons_order', $order_array );
         }
+        
+        // Sync custom description editor back to post_content field
+        if ( isset( $_POST['lms_course_description'] ) ) {
+            remove_action( 'save_post', 'reandaily_lms_save_metaboxes_data' );
+            wp_update_post( array(
+                'ID'           => $post_id,
+                'post_content' => wp_kses_post( $_POST['lms_course_description'] ),
+            ) );
+            add_action( 'save_post', 'reandaily_lms_save_metaboxes_data' );
+        }
     }
 
-    // Save Lesson Meta
+    // Save Lesson Builder fields
     if ( isset( $_POST['lms_lesson_meta_nonce'] ) && wp_verify_nonce( $_POST['lms_lesson_meta_nonce'], 'reandaily_lms_save_lesson_meta' ) ) {
         if ( isset( $_POST['lms_video_url'] ) ) {
             update_post_meta( $post_id, '_video_url', esc_url_raw( $_POST['lms_video_url'] ) );
@@ -998,8 +1286,19 @@ function reandaily_lms_save_metaboxes_data( $post_id ) {
         if ( isset( $_POST['lms_lesson_duration'] ) ) {
             update_post_meta( $post_id, '_duration', sanitize_text_field( $_POST['lms_lesson_duration'] ) );
         }
+        
         $is_preview = isset( $_POST['lms_is_preview'] ) ? '1' : '0';
         update_post_meta( $post_id, '_is_preview', $is_preview );
+
+        // Sync custom lesson editor back to post_content field
+        if ( isset( $_POST['lms_lesson_description'] ) ) {
+            remove_action( 'save_post', 'reandaily_lms_save_metaboxes_data' );
+            wp_update_post( array(
+                'ID'           => $post_id,
+                'post_content' => wp_kses_post( $_POST['lms_lesson_description'] ),
+            ) );
+            add_action( 'save_post', 'reandaily_lms_save_metaboxes_data' );
+        }
     }
 }
 add_action( 'save_post', 'reandaily_lms_save_metaboxes_data' );
