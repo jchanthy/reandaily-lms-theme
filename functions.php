@@ -815,7 +815,7 @@ function reandaily_lms_admin_enqueue( $hook ) {
     if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
         if ( $post && ( 'courses' === get_post_type( $post ) || 'lessons' === get_post_type( $post ) ) ) {
             wp_enqueue_script( 'jquery-ui-sortable' );
-            wp_localize_script( 'jquery', 'reandaily_lms_admin_vars', array(
+            wp_localize_script( 'jquery-ui-sortable', 'reandaily_lms_admin_vars', array(
                 'ajaxurl' => admin_url( 'admin-ajax.php' ),
                 'nonce'   => wp_create_nonce( 'reandaily_lms_ajax_nonce' ),
             ) );
@@ -1642,6 +1642,9 @@ function reandaily_lms_course_builder_html( $post ) {
             // Handle Publish/Update button click
             $('.lms-btn-publish').on('click', function(e) {
                 e.preventDefault();
+
+                // Explicit final sync of DOM hierarchy into sections state
+                saveStateFromDOM();
 
                 // Explicit final sync of all values
                 $('#title').val($('#lms-course-top-title').val());
