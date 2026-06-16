@@ -208,7 +208,7 @@
                     <div class="user-profile-trigger">
                         <img src="<?php echo esc_url( $avatar_url ); ?>" alt="Avatar" class="user-avatar">
                         <span class="user-name"><?php echo esc_html( $current_user->display_name ); ?></span>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width: 10px; height: 10px; color: var(--text-muted); display: block; flex-shrink: 0;"><path d="m6 9 6 6 6-6"/></svg>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: var(--text-muted);"></i>
                     </div>
                     <div class="profile-menu">
                         <a href="<?php echo esc_url( reandaily_lms_get_dashboard_url() ); ?>" class="profile-menu-link">

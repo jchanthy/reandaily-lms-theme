@@ -4,7 +4,7 @@ Theme URI: https://reandaily.com/
 GitHub Theme URI: jchanthy/reandaily-lms-theme
 Primary Branch: main
 Description: A custom, lightweight, high-performance Learning Management System theme built from scratch for ReanDaily. Fully integrated with KHQR/ABA payment gateways and a distraction-free custom classroom player.
-Version: 1.1.6
+Version: 1.1.7
 Author: Antigravity
 Author URI: https://reandaily.com/
 Text Domain: reandaily-lms-theme
@@ -80,9 +80,12 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.25;
 }
 
-/* Khmer-specific formatting when text contains Khmer script */
-:lang(kh), :lang(km), .khmer-text,
-:lang(kh) *, :lang(km) * {
+/* Khmer-specific formatting when text contains Khmer script (excluding FontAwesome icons) */
+:lang(kh):not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands), 
+:lang(km):not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands), 
+.khmer-text,
+:lang(kh) *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands), 
+:lang(km) *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands) {
     font-family: var(--font-khmer) !important;
 }
 
@@ -90,40 +93,40 @@ input, button, select, textarea, label, .btn, .tab {
     font-family: var(--font-primary);
 }
 
-/* Headings use Kantumruy Pro Bold in Khmer */
+/* Headings use Kantumruy Pro Bold in Khmer (excluding FontAwesome icons) */
 h1:lang(kh), h2:lang(kh), h3:lang(kh), h4:lang(kh), h5:lang(kh), h6:lang(kh),
 h1:lang(km), h2:lang(km), h3:lang(km), h4:lang(km), h5:lang(km), h6:lang(km),
 h1, h2, h3, h4, h5, h6,
-h1 *, h2 *, h3 *, h4 *, h5 *, h6 *,
-.khmer-heading, .khmer-heading * {
+h1 *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands), 
+h2 *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands), 
+h3 *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands), 
+h4 *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands), 
+h5 *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands), 
+h6 *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands),
+.khmer-heading, .khmer-heading *:not(i):not(.fa):not(.fab):not(.fas):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands) {
     font-family: var(--font-khmer-heading) !important;
     font-weight: 700;
 }
 
 /* Protect FontAwesome icons from any font overrides */
-.fa, .fa-solid, .fas, [class^="fa-solid "], [class*=" fa-solid "] {
+i.fa, i.fa-solid, i.fas, i.fa-regular, i.far, i.fa-brands, i.fab,
+.fa, .fa-solid, .fas, .fa-regular, .far, .fa-brands, .fab {
+    font-style: normal !important;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+i.fa-solid, i.fa, i.fas, .fa-solid, .fa, .fas {
     font-family: "Font Awesome 6 Free" !important;
     font-weight: 900 !important;
-    font-style: normal !important;
-    font-variant: normal;
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
 }
-.fa-regular, .far, [class^="fa-regular "], [class*=" fa-regular "] {
+i.fa-regular, i.far, .fa-regular, .far {
     font-family: "Font Awesome 6 Free" !important;
     font-weight: 400 !important;
-    font-style: normal !important;
-    font-variant: normal;
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
 }
-.fa-brands, .fab, [class^="fa-brands "], [class*=" fa-brands "] {
+i.fa-brands, i.fab, .fa-brands, .fab {
     font-family: "Font Awesome 6 Brands" !important;
     font-weight: 400 !important;
-    font-style: normal !important;
-    font-variant: normal;
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
 }
 
 a {
