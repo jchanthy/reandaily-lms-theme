@@ -98,36 +98,114 @@ function reandaily_lms_install_demo_data() {
     }
 
     if ( isset( $_GET['reandaily_install_demo'] ) ) {
-        // Create Bakong Test Course
-        $existing = get_page_by_path( 'bakong-test-course-real-bank-money', OBJECT, 'courses' );
-        if ( ! $existing ) {
+        // 1. Create Free Course
+        $free_course = get_page_by_path( 'introduction-to-web-development-free', OBJECT, 'courses' );
+        if ( ! $free_course ) {
             $course_id = wp_insert_post( array(
-                'post_title'   => 'Bakong Test Course (Real Bank Money)',
-                'post_content' => 'This course is created for testing real money transactions using Bakong KHQR. It is priced at $0.10 (USD) or 400 Riels (KHR).',
+                'post_title'   => 'Introduction to Web Development (Free)',
+                'post_name'    => 'introduction-to-web-development-free',
+                'post_content' => 'Welcome to the free Web Development course! In this course, you will learn the foundational building blocks of the web: HTML and CSS.',
                 'post_status'  => 'publish',
                 'post_type'    => 'courses'
             ) );
 
             if ( ! is_wp_error( $course_id ) ) {
-                update_post_meta( $course_id, '_price', '0.10' );
-                update_post_meta( $course_id, '_price_khr', '400' );
-                update_post_meta( $course_id, '_duration', '1 Hour' );
+                update_post_meta( $course_id, '_price', '0' );
+                update_post_meta( $course_id, '_price_khr', '0' );
+                update_post_meta( $course_id, '_duration', '2 Hours' );
                 update_post_meta( $course_id, '_level', 'Beginner' );
 
-                // Create lessons
+                // Create lessons for Free Course
                 $lesson_ids = array();
-                for ( $i = 1; $i <= 2; $i++ ) {
+                $lessons_data = array(
+                    array(
+                        'title' => 'Lesson 1: What is HTML?',
+                        'content' => 'HTML stands for HyperText Markup Language. It is the standard markup language for documents designed to be displayed in a web browser.',
+                        'video' => 'https://www.youtube.com/watch?v=kUMe1FH4CHE',
+                        'duration' => '10 mins',
+                        'preview' => '1'
+                    ),
+                    array(
+                        'title' => 'Lesson 2: CSS Styles and Layouts',
+                        'content' => 'Cascading Style Sheets (CSS) is a style sheet language used for describing the presentation of a document written in a markup language like HTML.',
+                        'video' => 'https://www.youtube.com/watch?v=1Rs2ND1ryYc',
+                        'duration' => '15 mins',
+                        'preview' => '0'
+                    )
+                );
+
+                foreach ( $lessons_data as $data ) {
                     $lesson_id = wp_insert_post( array(
-                        'post_title'   => "Lesson $i: Introduction to KHQR Payment",
-                        'post_content' => "This is lesson $i content. In this lesson, we will cover how to scan and verify payment.",
+                        'post_title'   => $data['title'],
+                        'post_content' => $data['content'],
                         'post_status'  => 'publish',
                         'post_type'    => 'lessons'
                     ) );
                     if ( ! is_wp_error( $lesson_id ) ) {
-                        update_post_meta( $lesson_id, '_duration', '15 mins' );
-                        if ( $i == 1 ) {
-                            update_post_meta( $lesson_id, '_is_preview', '1' );
-                        }
+                        update_post_meta( $lesson_id, '_duration', $data['duration'] );
+                        update_post_meta( $lesson_id, '_video_url', $data['video'] );
+                        update_post_meta( $lesson_id, '_is_preview', $data['preview'] );
+                        $lesson_ids[] = $lesson_id;
+                    }
+                }
+                update_post_meta( $course_id, '_lessons_order', $lesson_ids );
+            }
+        }
+
+        // 2. Create Paid Course
+        $paid_course = get_page_by_path( 'mastering-wordpress-lms-theme-design-paid', OBJECT, 'courses' );
+        if ( ! $paid_course ) {
+            $course_id = wp_insert_post( array(
+                'post_title'   => 'Mastering WordPress LMS Theme Design (Paid)',
+                'post_name'    => 'mastering-wordpress-lms-theme-design-paid',
+                'post_content' => 'Take your WordPress development skills to the next level. Learn how to design custom course builders, payment QR integration, and distraction-free classroom players.',
+                'post_status'  => 'publish',
+                'post_type'    => 'courses'
+            ) );
+
+            if ( ! is_wp_error( $course_id ) ) {
+                update_post_meta( $course_id, '_price', '15.00' );
+                update_post_meta( $course_id, '_price_khr', '60000' );
+                update_post_meta( $course_id, '_duration', '5 Hours' );
+                update_post_meta( $course_id, '_level', 'Intermediate' );
+
+                // Create lessons for Paid Course
+                $lesson_ids = array();
+                $lessons_data = array(
+                    array(
+                        'title' => 'Lesson 1: Theme Architecture & File Layout',
+                        'content' => 'In this lesson, we will cover how a lightweight LMS theme structures its templates, headers, footers, and dashboard layouts.',
+                        'video' => 'https://www.youtube.com/watch?v=mU6an7qxkTo',
+                        'duration' => '20 mins',
+                        'preview' => '1' // Free Preview
+                    ),
+                    array(
+                        'title' => 'Lesson 2: Custom Post Types and Meta Fields',
+                        'content' => 'Learn how to register custom post types for courses and lessons, and how to build tabbed editor dashboards to control values.',
+                        'video' => 'https://www.youtube.com/watch?v=8339H0k723Q',
+                        'duration' => '25 mins',
+                        'preview' => '0'
+                    ),
+                    array(
+                        'title' => 'Lesson 3: Customizing Video Player and Sidebar',
+                        'content' => 'Let us explore the classroom template to customize the side navigation panel and style the video player iframe elements.',
+                        'video' => 'https://www.youtube.com/watch?v=Sqzr-O_Gg1U',
+                        'duration' => '30 mins',
+                        'preview' => '0'
+                    )
+                );
+
+                foreach ( $lessons_data as $data ) {
+                    $lesson_id = wp_insert_post( array(
+                        'post_title'   => $data['title'],
+                        'post_content' => $data['content'],
+                        'post_status'  => 'publish',
+                        'post_type'    => 'lessons'
+                    ) );
+                    if ( ! is_wp_error( $lesson_id ) ) {
+                        update_post_meta( $lesson_id, '_duration', $data['duration'] );
+                        update_post_meta( $lesson_id, '_video_url', $data['video'] );
+                        update_post_meta( $lesson_id, '_is_preview', $data['preview'] );
                         $lesson_ids[] = $lesson_id;
                     }
                 }
