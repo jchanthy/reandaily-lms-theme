@@ -112,13 +112,16 @@ if ( is_user_logged_in() ) {
     <div style="position: sticky; top: 100px; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 32px; box-shadow: var(--shadow-md);">
         <!-- Price Display -->
         <div style="margin-bottom: 24px; text-align: center;">
-            <?php if ( empty( $price ) || $price <= 0 ) : ?>
+            <?php if ( ( empty( $price ) || $price <= 0 ) && ( empty( $price_khr ) || $price_khr <= 0 ) ) : ?>
                 <h3 style="font-size: 36px; font-weight: 800; color: var(--color-success);">FREE</h3>
             <?php else : ?>
-                <h3 style="font-size: 38px; font-weight: 800; color: var(--text-main);">$<?php echo number_format( $price, 2 ); ?></h3>
-                <?php if ( ! empty( $price_khr ) ) : ?>
-                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px; font-family: var(--font-khmer);"><?php echo number_format( $price_khr ); ?>៛</p>
-                <?php else : ?>
+                <?php if ( ! empty( $price ) && $price > 0 ) : ?>
+                    <h3 style="font-size: 38px; font-weight: 800; color: var(--text-main);">$<?php echo number_format( $price, 2 ); ?></h3>
+                <?php endif; ?>
+                
+                <?php if ( ! empty( $price_khr ) && $price_khr > 0 ) : ?>
+                    <h3 style="font-size: <?php echo ( ! empty( $price ) && $price > 0 ) ? '18px' : '38px'; ?>; font-weight: 800; color: <?php echo ( ! empty( $price ) && $price > 0 ) ? 'var(--text-muted)' : 'var(--text-main)'; ?>; margin-top: 4px; font-family: var(--font-khmer);"><?php echo number_format( $price_khr ); ?>៛</h3>
+                <?php elseif ( ! empty( $price ) && $price > 0 ) : ?>
                     <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px; font-family: var(--font-khmer);"><?php echo number_format( $price * 4100 ); ?>៛</p>
                 <?php endif; ?>
             <?php endif; ?>

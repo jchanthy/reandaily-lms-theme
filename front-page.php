@@ -108,12 +108,16 @@ get_header();
                                 <span><i class="fa-regular fa-clock" style="margin-right: 6px; color: var(--color-secondary);"></i><?php echo esc_html( $duration ? $duration : 'Self-Paced' ); ?></span>
                                 
                                 <div style="text-align: right;">
-                                    <?php if ( empty( $price ) || $price <= 0 ) : ?>
-                                        <span style="font-size: 18px; font-weight: 800; color: var(--color-success);">FREE</span>
-                                    <?php else : ?>
-                                        <span style="font-size: 18px; font-weight: 800; color: var(--text-main);">$<?php echo number_format( $price, 2 ); ?></span>
-                                    <?php endif; ?>
-                                </div>
+                                     <?php 
+                                     if ( ( empty( $price ) || $price <= 0 ) && ( empty( $price_khr ) || $price_khr <= 0 ) ) {
+                                         echo '<span style="font-size: 18px; font-weight: 800; color: var(--color-success);">FREE</span>';
+                                     } elseif ( ! empty( $price ) && $price > 0 ) {
+                                         echo '<span style="font-size: 18px; font-weight: 800; color: var(--text-main);">' . '$' . number_format( $price, 2 ) . '</span>';
+                                     } else {
+                                         echo '<span style="font-size: 18px; font-weight: 800; color: var(--text-main); font-family: var(--font-khmer);">' . number_format( $price_khr ) . '៛</span>';
+                                     }
+                                     ?>
+                                 </div>
                             </div>
                         </div>
                     </div>

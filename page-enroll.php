@@ -44,6 +44,50 @@ if ( $enroll_status === 'active' ) {
 // Course details
 $price_usd    = floatval( get_post_meta( $course_id, '_price', true ) );
 $price_khr    = floatval( get_post_meta( $course_id, '_price_khr', true ) );
+
+// Auto-enroll if the course is free (both prices are 0 or empty)
+if ( $price_usd <= 0 && $price_khr <= 0 ) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'reandaily_lms';
+    
+    $exists = $wpdb->get_row( $wpdb->prepare(
+        "SELECT id FROM $table_name WHERE user_id = %d AND course_id = %d LIMIT 1",
+        $user_id,
+        $course_id
+    ) );
+    
+    if ( $exists ) {
+        $wpdb->update(
+            $table_name,
+            array(
+                'status'     => 'active',
+                'created_at' => current_time( 'mysql' )
+            ),
+            array( 'id' => $exists->id )
+        );
+    } else {
+        $wpdb->insert(
+            $table_name,
+            array(
+                'user_id'        => $user_id,
+                'course_id'      => $course_id,
+                'status'         => 'active',
+                'bill_number'    => 'FREE-' . $course_id . '-' . time(),
+                'payment_method' => 'free',
+                'created_at'     => current_time( 'mysql' )
+            )
+        );
+    }
+    
+    $lessons_order = get_post_meta( $course_id, '_lessons_order', true );
+    if ( ! empty( $lessons_order ) && is_array( $lessons_order ) ) {
+        wp_redirect( add_query_arg( 'course_id', $course_id, get_permalink( $lessons_order[0] ) ) );
+    } else {
+        wp_redirect( get_permalink( $course_id ) );
+    }
+    exit;
+}
+
 if ( ! $price_khr ) {
     $price_khr = round( $price_usd * 4100 );
 }
