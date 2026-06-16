@@ -1016,6 +1016,22 @@ function reandaily_lms_course_builder_html( $post ) {
             color: #f1f5f9;
             border-color: #475569;
         }
+        .lms-btn-save-draft {
+            background: transparent;
+            border: 1px solid #475569;
+            color: #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13.5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .lms-btn-save-draft:hover {
+            background: #1e293b;
+            color: #fff;
+            border-color: #64748b;
+        }
         .lms-btn-publish {
             background: #3b82f6;
             border: none;
@@ -1419,7 +1435,12 @@ function reandaily_lms_course_builder_html( $post ) {
             
             <div class="lms-nav-right">
                 <button type="button" class="lms-btn-toggle-old"><?php _e('Switch to old builder', 'reandaily-lms-theme'); ?></button>
-                <button type="button" class="lms-btn-publish"><?php _e('Publish', 'reandaily-lms-theme'); ?></button>
+                <?php if ( get_post_status( $post->ID ) !== 'publish' ) : ?>
+                    <button type="button" class="lms-btn-save-draft"><?php _e('Save Draft', 'reandaily-lms-theme'); ?></button>
+                <?php endif; ?>
+                <button type="button" class="lms-btn-publish"><?php 
+                    echo ( get_post_status( $post->ID ) === 'publish' ) ? __('Update', 'reandaily-lms-theme') : __('Publish', 'reandaily-lms-theme'); 
+                ?></button>
                 <?php if ( get_post_status( $post->ID ) === 'publish' ) : ?>
                     <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" target="_blank" class="lms-btn-view"><?php _e('View', 'reandaily-lms-theme'); ?></a>
                 <?php endif; ?>
@@ -1670,6 +1691,47 @@ function reandaily_lms_course_builder_html( $post ) {
                 }
                 
                 // Submit using native HTML Form element to bypass jQuery recursion/interceptors
+                document.getElementById('post').submit();
+            });
+
+            // Handle Save Draft button click
+            $('.lms-btn-save-draft').on('click', function(e) {
+                e.preventDefault();
+
+                // Explicit final sync of DOM hierarchy into sections state
+                saveStateFromDOM();
+
+                // Explicit final sync of all values
+                $('#title').val($('#lms-course-top-title').val());
+                $('#lms_duration').val($('#lms_duration_fs').val());
+                $('#lms_level').val($('#lms_level_fs').val());
+                $('#lms_price').val($('#lms_price_fs').val());
+                $('#lms_price_khr').val($('#lms_price_khr_fs').val());
+                $('#lms_trailer_url').val($('#lms_trailer_url_fs').val());
+
+                // Sync TinyMCE editors
+                if (typeof tinyMCE !== 'undefined') {
+                    tinyMCE.triggerSave();
+                }
+
+                // Simulate clicking the WP save-post button (Save Draft)
+                var saveBtn = $('#save-post');
+                if (saveBtn.length) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: saveBtn.attr('name'),
+                        value: saveBtn.val()
+                    }).appendTo('#post');
+                } else {
+                    // Fallback to custom save parameter if standard button not present
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'save',
+                        value: 'Save Draft'
+                    }).appendTo('#post');
+                }
+                
+                // Submit using native HTML Form element
                 document.getElementById('post').submit();
             });
 
