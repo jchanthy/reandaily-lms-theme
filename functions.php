@@ -1669,7 +1669,8 @@ function reandaily_lms_course_builder_html( $post ) {
                     }).appendTo('#post');
                 }
                 
-                $('#post').submit();
+                // Submit using native HTML Form element to bypass jQuery recursion/interceptors
+                document.getElementById('post').submit();
             });
 
             // Initialize Sortable on sections and lesson lists
@@ -1697,11 +1698,14 @@ function reandaily_lms_course_builder_html( $post ) {
             function saveStateFromDOM() {
                 var updatedSections = [];
                 $("#lms-sections-sortable .lms-section-card").each(function() {
-                    var secId = $(this).data('id');
+                    var secId = $(this).attr('data-id');
                     var secTitle = $(this).find('.lms-section-title-input').val();
                     var lessons = [];
                     $(this).find('.lms-section-lesson-item').each(function() {
-                        lessons.push($(this).data('id'));
+                        var lessonId = $(this).attr('data-id');
+                        if (lessonId) {
+                            lessons.push(parseInt(lessonId));
+                        }
                     });
                     updatedSections.push({
                         id: secId,
@@ -1763,7 +1767,7 @@ function reandaily_lms_course_builder_html( $post ) {
                     sectionHtml += `
                             </ul>
                             <div class="lms-section-footer-btns">
-                                <button type="button" class="lms-btn-add-lesson" data-section-index="${secIndex}">
+                                <button type="button" class="lms-btn-add-lesson" data-section-id="${sec.id}">
                                     <span class="dashicons dashicons-plus-alt"></span> Add lesson
                                 </button>
                             </div>
@@ -1822,7 +1826,7 @@ function reandaily_lms_course_builder_html( $post ) {
 
             // Add Lesson inside a section via Ajax
             $(document).on('click', '.lms-btn-add-lesson', function() {
-                var secIndex = $(this).data('section-index');
+                var secId = $(this).attr('data-section-id');
                 var title = prompt("Enter lesson title:");
                 if (title) {
                     var btn = $(this);
@@ -1835,7 +1839,14 @@ function reandaily_lms_course_builder_html( $post ) {
                     }, function(res) {
                         btn.prop('disabled', false).html('<span class="dashicons dashicons-plus-alt"></span> Add lesson');
                         if (res.success) {
-                            sections[secIndex].lessons.push(res.data.id);
+                            // Find section in state and add lesson id
+                            var foundSec = sections.find(function(s) { return s.id == secId; });
+                            if (foundSec) {
+                                if (!foundSec.lessons) {
+                                    foundSec.lessons = [];
+                                }
+                                foundSec.lessons.push(res.data.id);
+                            }
                             $('#lms-course-sections-input').val(JSON.stringify(sections));
                             renderCurriculum();
                             // Select the newly created lesson immediately
