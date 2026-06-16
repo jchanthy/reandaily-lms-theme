@@ -2199,12 +2199,16 @@ function reandaily_lms_save_metaboxes_data( $post_id ) {
     if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
         return;
     }
-    if ( ! current_user_can( 'edit_post', $post_id ) ) {
-        return;
-    }
 
     // Save Course Builder fields
+    $is_saving_course = false;
     if ( isset( $_POST['lms_course_meta_nonce'] ) && wp_verify_nonce( $_POST['lms_course_meta_nonce'], 'reandaily_lms_save_course_meta' ) ) {
+        $is_saving_course = true;
+    } elseif ( isset( $_POST['post_type'] ) && $_POST['post_type'] === 'courses' && current_user_can( 'edit_post', $post_id ) ) {
+        $is_saving_course = true;
+    }
+
+    if ( $is_saving_course ) {
         if ( isset( $_POST['lms_price'] ) ) {
             update_post_meta( $post_id, '_price', sanitize_text_field( $_POST['lms_price'] ) );
         }
@@ -2255,7 +2259,14 @@ function reandaily_lms_save_metaboxes_data( $post_id ) {
     }
 
     // Save Lesson Builder fields
+    $is_saving_lesson = false;
     if ( isset( $_POST['lms_lesson_meta_nonce'] ) && wp_verify_nonce( $_POST['lms_lesson_meta_nonce'], 'reandaily_lms_save_lesson_meta' ) ) {
+        $is_saving_lesson = true;
+    } elseif ( isset( $_POST['post_type'] ) && $_POST['post_type'] === 'lessons' && current_user_can( 'edit_post', $post_id ) ) {
+        $is_saving_lesson = true;
+    }
+
+    if ( $is_saving_lesson ) {
         if ( isset( $_POST['lms_video_url'] ) ) {
             update_post_meta( $post_id, '_video_url', esc_url_raw( $_POST['lms_video_url'] ) );
         }
