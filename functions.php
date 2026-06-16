@@ -225,11 +225,18 @@ function reandaily_lms_register_cpts() {
     // Courses Custom Post Type
     register_post_type( 'courses', array(
         'labels' => array(
-            'name'          => __( 'Courses', 'reandaily-lms-theme' ),
-            'singular_name' => __( 'Course', 'reandaily-lms-theme' ),
-            'add_new'       => __( 'Add New Course', 'reandaily-lms-theme' ),
-            'edit_item'     => __( 'Edit Course', 'reandaily-lms-theme' ),
-            'all_items'     => __( 'All Courses', 'reandaily-lms-theme' ),
+            'name'                  => __( 'Courses', 'reandaily-lms-theme' ),
+            'singular_name'         => __( 'Course', 'reandaily-lms-theme' ),
+            'add_new'               => __( 'Add New Course', 'reandaily-lms-theme' ),
+            'add_new_item'          => __( 'Add New Course', 'reandaily-lms-theme' ),
+            'edit_item'             => __( 'Edit Course', 'reandaily-lms-theme' ),
+            'new_item'              => __( 'New Course', 'reandaily-lms-theme' ),
+            'view_item'             => __( 'View Course', 'reandaily-lms-theme' ),
+            'search_items'          => __( 'Search Courses', 'reandaily-lms-theme' ),
+            'not_found'             => __( 'No courses found', 'reandaily-lms-theme' ),
+            'not_found_in_trash'    => __( 'No courses found in trash', 'reandaily-lms-theme' ),
+            'all_items'             => __( 'All Courses', 'reandaily-lms-theme' ),
+            'name_admin_bar'        => __( 'Course', 'reandaily-lms-theme' ),
         ),
         'public'      => true,
         'has_archive' => true,
@@ -242,11 +249,18 @@ function reandaily_lms_register_cpts() {
     // Lessons Custom Post Type
     register_post_type( 'lessons', array(
         'labels' => array(
-            'name'          => __( 'Lessons', 'reandaily-lms-theme' ),
-            'singular_name' => __( 'Lesson', 'reandaily-lms-theme' ),
-            'add_new'       => __( 'Add New Lesson', 'reandaily-lms-theme' ),
-            'edit_item'     => __( 'Edit Lesson', 'reandaily-lms-theme' ),
-            'all_items'     => __( 'All Lessons', 'reandaily-lms-theme' ),
+            'name'                  => __( 'Lessons', 'reandaily-lms-theme' ),
+            'singular_name'         => __( 'Lesson', 'reandaily-lms-theme' ),
+            'add_new'               => __( 'Add New Lesson', 'reandaily-lms-theme' ),
+            'add_new_item'          => __( 'Add New Lesson', 'reandaily-lms-theme' ),
+            'edit_item'             => __( 'Edit Lesson', 'reandaily-lms-theme' ),
+            'new_item'              => __( 'New Lesson', 'reandaily-lms-theme' ),
+            'view_item'             => __( 'View Lesson', 'reandaily-lms-theme' ),
+            'search_items'          => __( 'Search Lessons', 'reandaily-lms-theme' ),
+            'not_found'             => __( 'No lessons found', 'reandaily-lms-theme' ),
+            'not_found_in_trash'    => __( 'No lessons found in trash', 'reandaily-lms-theme' ),
+            'all_items'             => __( 'All Lessons', 'reandaily-lms-theme' ),
+            'name_admin_bar'        => __( 'Lesson', 'reandaily-lms-theme' ),
         ),
         'public'      => true,
         'has_archive' => false,
@@ -1405,7 +1419,7 @@ function reandaily_lms_course_builder_html( $post ) {
             
             <div class="lms-nav-right">
                 <button type="button" class="lms-btn-toggle-old"><?php _e('Switch to old builder', 'reandaily-lms-theme'); ?></button>
-                <button type="button" class="lms-btn-publish" onclick="jQuery('#publish').click();"><?php _e('Publish', 'reandaily-lms-theme'); ?></button>
+                <button type="button" class="lms-btn-publish"><?php _e('Publish', 'reandaily-lms-theme'); ?></button>
                 <?php if ( get_post_status( $post->ID ) === 'publish' ) : ?>
                     <a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" target="_blank" class="lms-btn-view"><?php _e('View', 'reandaily-lms-theme'); ?></a>
                 <?php endif; ?>
@@ -1624,6 +1638,36 @@ function reandaily_lms_course_builder_html( $post ) {
             $('#lms_price_fs').on('input', function() { $('#lms_price').val($(this).val()); });
             $('#lms_price_khr_fs').on('input', function() { $('#lms_price_khr').val($(this).val()); });
             $('#lms_trailer_url_fs').on('input', function() { $('#lms_trailer_url').val($(this).val()); });
+
+            // Handle Publish/Update button click
+            $('.lms-btn-publish').on('click', function(e) {
+                e.preventDefault();
+
+                // Explicit final sync of all values
+                $('#title').val($('#lms-course-top-title').val());
+                $('#lms_duration').val($('#lms_duration_fs').val());
+                $('#lms_level').val($('#lms_level_fs').val());
+                $('#lms_price').val($('#lms_price_fs').val());
+                $('#lms_price_khr').val($('#lms_price_khr_fs').val());
+                $('#lms_trailer_url').val($('#lms_trailer_url_fs').val());
+
+                // Sync TinyMCE editors
+                if (typeof tinyMCE !== 'undefined') {
+                    tinyMCE.triggerSave();
+                }
+
+                // Simulate clicking the WP publish/update button to pass post-status validation
+                var publishBtn = $('#publish');
+                if (publishBtn.length) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: publishBtn.attr('name'),
+                        value: publishBtn.val()
+                    }).appendTo('#post');
+                }
+                
+                $('#post').submit();
+            });
 
             // Initialize Sortable on sections and lesson lists
             function initSyllabusSortables() {
