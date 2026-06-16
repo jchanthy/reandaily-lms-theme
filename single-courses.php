@@ -61,42 +61,68 @@ if ( is_user_logged_in() ) {
             <h2 style="font-size: 24px; border-bottom: 1.5px solid var(--color-primary); width: fit-content; padding-bottom: 8px; margin-bottom: 20px;">មាតិកាមេរៀន (Curriculum)</h2>
             <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); overflow: hidden;">
                 <?php
-                if ( ! empty( $lessons_order ) ) :
-                    $index = 1;
-                    foreach ( $lessons_order as $lesson_id ) :
-                        $lesson_post = get_post( $lesson_id );
-                        if ( ! $lesson_post ) continue;
+                $sections = get_post_meta( $course_id, '_course_sections', true );
+                if ( ! is_array( $sections ) || empty( $sections ) ) {
+                    // Fallback to flat list
+                    $sections = array(
+                        array(
+                            'title' => 'Section 1: Lectures',
+                            'lessons' => $lessons_order
+                        )
+                    );
+                }
 
-                        $is_preview = get_post_meta( $lesson_id, '_is_preview', true );
-                        $lesson_duration = get_post_meta( $lesson_id, '_duration', true );
-                        
-                        // Determine if lesson can be viewed
-                        $can_view = ( $enroll_status === 'active' || $enroll_status === 'completed' || $is_preview || current_user_can( 'manage_options' ) );
-                        $lesson_url = $can_view ? add_query_arg( 'course_id', $course_id, get_permalink( $lesson_id ) ) : '#';
+                if ( ! empty( $sections ) ) :
+                    $index = 1;
+                    foreach ( $sections as $section ) :
+                        if ( empty( $section['lessons'] ) ) continue;
                         ?>
-                        <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; transition: var(--transition-fast);" <?php if ($can_view): ?>onmouseover="this.style.background='rgba(15,23,42,0.02)';" onmouseout="this.style.background='transparent';"<?php endif; ?>>
-                            <div style="display: flex; align-items: center; gap: 16px;">
-                                <span style="color: var(--text-muted); font-size: 14px; font-weight: 600; width: 20px;"><?php echo $index++; ?>.</span>
-                                <div style="display: flex; flex-direction: column;">
-                                    <?php if ( $can_view ) : ?>
-                                        <a href="<?php echo esc_url( $lesson_url ); ?>" style="color: var(--text-main); font-weight: 500; font-family: var(--font-khmer);"><?php echo esc_html( $lesson_post->post_title ); ?></a>
-                                    <?php else : ?>
-                                        <span style="color: var(--text-muted); font-weight: 500; font-family: var(--font-khmer); cursor: not-allowed;"><i class="fa-solid fa-lock" style="font-size: 12px; margin-right: 8px; color: var(--text-muted);"></i><?php echo esc_html( $lesson_post->post_title ); ?></span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            
-                            <div style="display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--text-muted);">
-                                <?php if ( $lesson_duration ) : ?>
-                                    <span><i class="fa-regular fa-clock" style="margin-right: 6px;"></i><?php echo esc_html( $lesson_duration ); ?></span>
-                                <?php endif; ?>
-                                
-                                <?php if ( $is_preview && $enroll_status !== 'active' ) : ?>
-                                    <span style="background: rgba(16,185,129,0.15); color: var(--color-success); border: 1px solid rgba(16,185,129,0.2); border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600;">PREVIEW</span>
-                                <?php endif; ?>
-                            </div>
+                        <!-- Section Heading Row -->
+                        <div style="background: rgba(15, 23, 42, 0.03); padding: 12px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-weight: 700; color: var(--text-main); font-family: var(--font-khmer-heading); font-size: 15px;"><?php echo esc_html( $section['title'] ); ?></span>
+                            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;"><?php echo count( $section['lessons'] ); ?> មេរៀន</span>
                         </div>
-                    <?php 
+
+                        <div style="border-bottom: 1px solid var(--border-color); margin-bottom: -1px;">
+                            <?php
+                            foreach ( $section['lessons'] as $lesson_id ) :
+                                $lesson_post = get_post( $lesson_id );
+                                if ( ! $lesson_post ) continue;
+
+                                $is_preview = get_post_meta( $lesson_id, '_is_preview', true );
+                                $lesson_duration = get_post_meta( $lesson_id, '_duration', true );
+                                
+                                // Determine if lesson can be viewed
+                                $can_view = ( $enroll_status === 'active' || $enroll_status === 'completed' || $is_preview || current_user_can( 'manage_options' ) );
+                                $lesson_url = $can_view ? add_query_arg( 'course_id', $course_id, get_permalink( $lesson_id ) ) : '#';
+                                ?>
+                                <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(15,23,42,0.04); transition: var(--transition-fast);" <?php if ($can_view): ?>onmouseover="this.style.background='rgba(15,23,42,0.02)';" onmouseout="this.style.background='transparent';"<?php endif; ?>>
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <span style="color: var(--text-muted); font-size: 14px; font-weight: 600; width: 20px;"><?php echo $index++; ?>.</span>
+                                        <div style="display: flex; flex-direction: column;">
+                                            <?php if ( $can_view ) : ?>
+                                                <a href="<?php echo esc_url( $lesson_url ); ?>" style="color: var(--text-main); font-weight: 500; font-family: var(--font-khmer);"><?php echo esc_html( $lesson_post->post_title ); ?></a>
+                                            <?php else : ?>
+                                                <span style="color: var(--text-muted); font-weight: 500; font-family: var(--font-khmer); cursor: not-allowed;"><i class="fa-solid fa-lock" style="font-size: 12px; margin-right: 8px; color: var(--text-muted);"></i><?php echo esc_html( $lesson_post->post_title ); ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--text-muted);">
+                                        <?php if ( $lesson_duration ) : ?>
+                                            <span><i class="fa-regular fa-clock" style="margin-right: 6px;"></i><?php echo esc_html( $lesson_duration ); ?></span>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ( $is_preview && $enroll_status !== 'active' ) : ?>
+                                            <span style="background: rgba(16,185,129,0.15); color: var(--color-success); border: 1px solid rgba(16,185,129,0.2); border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600;">PREVIEW</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php 
+                            endforeach;
+                            ?>
+                        </div>
+                    <?php
                     endforeach;
                 else : ?>
                     <div style="padding: 32px; text-align: center; color: var(--text-muted);">
