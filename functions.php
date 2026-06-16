@@ -774,6 +774,30 @@ function reandaily_lms_course_builder_html( $post ) {
     $course_description = get_post_field( 'post_content', $post->ID );
     ?>
     <style>
+        /* Force fullwidth edit page layout */
+        #poststuff {
+            max-width: 100% !important;
+        }
+        #post-body.columns-2 {
+            margin-right: 0 !important;
+        }
+        #postbox-container-1 {
+            float: none !important;
+            width: 100% !important;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        #postbox-container-1 .postbox {
+            flex: 1;
+            min-width: 280px;
+            margin-bottom: 0 !important;
+        }
+        #postbox-container-2 {
+            width: 100% !important;
+            float: none !important;
+        }
         .lms-builder-container {
             display: flex;
             background: #fff;
@@ -1083,6 +1107,30 @@ function reandaily_lms_lesson_builder_html( $post ) {
     $lesson_content = get_post_field( 'post_content', $post->ID );
     ?>
     <style>
+        /* Force fullwidth edit page layout */
+        #poststuff {
+            max-width: 100% !important;
+        }
+        #post-body.columns-2 {
+            margin-right: 0 !important;
+        }
+        #postbox-container-1 {
+            float: none !important;
+            width: 100% !important;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        #postbox-container-1 .postbox {
+            flex: 1;
+            min-width: 280px;
+            margin-bottom: 0 !important;
+        }
+        #postbox-container-2 {
+            width: 100% !important;
+            float: none !important;
+        }
         .lms-builder-container {
             display: flex;
             background: #fff;
